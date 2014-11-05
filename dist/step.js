@@ -3,7 +3,7 @@ angular.module('angular.tourist').directive('tourStep', [
     return {
       restrict: 'EAC',
       link: function(scope, element, attrs) {
-        return tourist.registerStep(attrs.tourStep, scope);
+        return tourist.registerStep(attrs.tourStep, element);
       }
     };
   }

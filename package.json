@@ -29,6 +29,7 @@
     "gulp-minify": "0.0.5",
     "gulp-plumber": "^0.6.6",
     "gulp-serve": "^0.3.0",
+    "gulp-slim": "0.0.10",
     "gulp-util": "^3.0.1",
     "gulp-watch": "^1.1.0"
   }

@@ -1,53 +1,118 @@
+class Tour
+  constructor: (options) ->
+    @options = options
+    @setSteps(options.steps)
+    @elements = {}
+    @templates = {}
+    @reset()
+    @on('setup', options.setup) if options.setup?
+    @on('teardown', options.teardown) if options.teardown?
+    @on('setup', @setup)
+    @on('teardown', @teardown)
+
+    if @options.autostart
+      @start()
+
+  reset: () =>
+    @index = false
+    @activeStep = null
+    @lastStep = null
+
+  start: (at = 0) =>
+    unless @activeStep?
+      @setActiveStep(at)
+      @activate()
+      @emit('started')
+
+  end: =>
+    if @activeStep?
+      @emit('teardown', @activeStep)
+      @getTemplate().hide()
+      @emit('complete')
+      @reset()
+
+  next: =>
+    if @setActiveStep(@index + 1)
+      @activate()
+    else
+      @end()
+
+  previous: =>
+    if @setActiveStep(@index - 1)
+      @activate()
+
+  activate: () =>
+    @emit('teardown', @lastStep) if @lastStep?
+    @emit('setup', @activeStep)
+    @showStep()
+
+  on: (event, handler) =>
+    Tour.$rootScope.$on("$$tour-#{event}", handler)
+
+  emit: (event, step = null) =>
+    if step && fn = step[event]
+      fn.apply(@, [@stepScope(step)])
+    Tour.$rootScope.$emit("$$tour-#{event}", @)
+
+  setActiveStep: (index) =>
+    if index >= @steps.length
+      @index = null
+    else if index >= 0
+      @lastStep = @getStep(@index) unless @index == false
+      @index = index
+      @activeStep = @getStep(index)
+      true
+
+  showStep: () =>
+    @getTemplate().show(@getElement(), @activeStep)
+
+  setup: () =>
+    el = @getElement()
+    if @activeStep.activeClass?
+      el.addClass(@activeStep.activeClass)
+
+  teardown: () =>
+    el = @getElement()
+    if @activeStep.activeClass?
+      el.removeClass(@activeStep.activeClass)
+
+  getTemplate: () =>
+    @templates[@activeStep.template || 'default']
+
+  getElement: () =>
+    @elements[@activeStep.for]
+
+  setSteps: (steps) =>
+    @steps = []
+    for step in steps
+      @steps.push(angular.extend({}, @options.stepDefault || {}, step))
+    return
+
+  getStep: () =>
+    @steps[@index]
+
+  stepScope: (step) =>
+    angular.element(@elements[step.for]).scope()
+
+  registerStep: (name, element) =>
+    @elements[name] = element
+
+  registerTemplate: (name, ctrl) =>
+    @templates[name || 'default'] = ctrl
+
 angular.module 'angular.tourist'
 
-  .constant 'Tour', ->
-    class Tour
-      @_DEPS = {}
-      @PROPERTIES = ['for', 'content', 'before', 'after']
-
-      constructor: (@steps, @defaults) ->
-        @index = false
-        @scopes = {}
-        @lastStep = null
-
-      start: (at = 0) =>
-        return unless @index == false
-        @index = at
-        @process()
-
-      next: =>
-        @index ++
-        @process()
-
-      process: () =>
-        @beforeCallbacks()
-        @applyTemplate()
-
-      activeStep: =>
-        return null if @index == false
-        @extendStep(@steps[@index])
-
-      extendStep: (step) =>
-        angular.extend(true, @options.stepDefault, step)
-
-  .provider 'tourist', ['Tour', (Tour) ->
-
-    _tour = null
+  .provider 'tourist', ->
+    _tourOptions = null
 
     @define = (options) =>
-      _tour = new Tour(options.steps, options.stepDefault)
-      if options.autostart
-        _tour.start()
+      _tourOptions = options
       return
 
-    @.$get = ['$injector', ($injector) ->
-      {
-        tour: () -> _tour,
-        start: () -> _tour.start()
-        registerStep: (name, scope) ->
-          _tour.scopes[name] = scope
-      }
+    @.$get = ['$injector', '$rootScope', ($injector, $rootScope) ->
+      Tour.$rootScope = $rootScope
+      Tour.$injector = $injector
+      new Tour(_tourOptions)
     ]
 
     return
-  ]

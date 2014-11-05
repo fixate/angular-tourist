@@ -1,0 +1,26 @@
+{
+  "name": "angular-tourist-demo",
+  "version": "0.0.0",
+  "authors": [
+    "Stan Bondi <stan@fixate.it>"
+  ],
+  "description": "Demo for angular tourist",
+  "private": true,
+  "main": "index.html",
+  "keywords": [
+    "angular",
+    "tour",
+    "directives"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "qtip2": "~2.2.1"
+  }
+}

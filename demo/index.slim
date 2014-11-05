@@ -1,0 +1,62 @@
+html ng-app="angular.tourist.demo"
+head
+  link href="/demo/css/normalize.css" media="all" rel="stylesheet"
+  link href="/demo/css/foundation.css" media="all" rel="stylesheet"
+  link href="/demo/css/style.css" media="all" rel="stylesheet"
+  link href="bower_components/qtip2/jquery.qtip.css" media="all" rel="stylesheet"
+
+body ng-controller="DemoCtrl"
+  nav.top-bar
+    ul.title-area
+      li.name
+        h1
+          a href="#"  Angular Tourist Demo
+    section.top-bar-section
+      ul.left
+        li
+          button ng-disabled="tourStarted" ng-click="startTour()" Start Tour
+        li
+          button.alert ng-disabled="!tourStarted" ng-click="endTour()" End Tour
+
+  .left
+    ul.side-nav tour-step="navigation"
+      li
+        a href="#step1"  Step 1
+      li
+        a href="#step2"  Step 2
+      li
+        a href="#step3"  Step 3
+      li ng-if="extraNavItem"
+        a href="#" This shows on step#1
+      li.divider
+      li tour-step="exitNav"
+        a href="#exit"  Exit
+  .row
+    .large-4.columns tour-step="image"
+      img src="http://lorempixel.com/300/400/" /
+    .large-4.columns tour-step="paragraph"
+      p
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+    .large-4.columns
+
+  script id="angular/tour.html" type="text/ng-template"
+    /* div ui-tooltip="" content="<h3 ng-if='title'>{{ title }}</h3> {{ content }}"*/
+    div ng-style="styles" ng-if="show" class="tour_-highlight" ui-tooltip="" content="{{ content }}"
+      button ng-click="next()" Next
+      button ng-click="previous()" Prev
+    /* div*/
+    /*   h3 ng-if="title" {{ title }}*/
+    /*   p*/
+    /*     | {{ content }}*/
+    /*   button ng-disabled="!hasNext()" Next*/
+
+  div tour-template="" src="angular/tour.html" active-class="tour_-highlight"
+
+  script src="bower_components/jquery/dist/jquery.js"
+  script src="bower_components/qtip2/jquery.qtip.js"
+  script src="/bower_components/angular/angular.js"
+  script src="/dist/module.js"
+  script src="/dist/step.js"
+  script src="/dist/tour.js"
+  script src="/dist/template.js"
+  script src="/demo/js/demo.js"
