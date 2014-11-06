@@ -5,6 +5,9 @@ watch = require 'gulp-watch'
 serve = require 'gulp-serve'
 plumber = require 'gulp-plumber'
 slim = require 'gulp-slim'
+uglify = require 'gulp-uglify'
+concat = require 'gulp-concat'
+rename = require 'gulp-rename'
 
 COFFEE_FILES = [
   './src/module.coffee'
@@ -25,7 +28,7 @@ gulp.task 'coffee', () ->
   gulp.src COFFEE_FILES
     .pipe plumber(errorHandler: gutil.log)
     .pipe coffee(bare: true)
-    .pipe gulp.dest('./dist/')
+    .pipe gulp.dest('./dist/dev/')
 
 gulp.task 'demo-coffee', () ->
   gulp.src DEMO_JS_FILES
@@ -44,7 +47,17 @@ gulp.task 'watch', () ->
   gulp.watch DEMO_JS_FILES, ['demo-coffee']
   gulp.watch DEMO_HTML_FILES, ['demo-slim']
 
-gulp.task 'build', () ->
-  gulp.start('coffee', 'concat', 'minify')
+gulp.task 'concat', ['coffee'], () ->
+  gulp.src './dist/dev/*.js'
+    .pipe concat('angular-tourist.js')
+    .pipe gulp.dest('./dist/')
+
+gulp.task 'uglify', ['concat'], () ->
+  gulp.src './dist/angular-tourist.js'
+    .pipe uglify()
+    .pipe rename('angular-tourist.min.js')
+    .pipe gulp.dest('./dist/')
+
+gulp.task 'build', ['coffee', 'uglify']
 
 gulp.task 'serve', serve(root: __dirname, port: 8000)

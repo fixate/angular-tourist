@@ -5,7 +5,7 @@
     "Stan Bondi <stan@fixate.it>"
   ],
   "description": "Angular directives to help you show people around your app.",
-  "main": "src/angular-tourist.coffee",
+  "main": "dist/angular-tourist.js",
   "keywords": [
     "angular",
     "tour",
