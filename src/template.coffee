@@ -32,27 +32,16 @@ angular.module 'angular.tourist'
           }
 
         @show = (element, step) ->
+          $scope.show = true
           $scope.styles = angular.extend(_boundingOffset(element[0]), {position: 'absolute'})
-
-          if step.values
-            angular.forEach step.values, (v, k) ->
-              $scope[k] = v
-            $scope.content = $interpolate(step.content)($scope)
+          $scope.values = step.values
+          $scope.content = $interpolate(step.content)($scope)
 
         @hide = () =>
+          $scope.show = false
       ]
       link: (scope, element, attrs, ctrl) ->
         tourist.registerTemplate(scope.templateName, ctrl)
-        scope.next = () ->
-          tourist.next()
-
-        scope.previous = () ->
-          tourist.previous()
-
-        tourist.on 'complete', ->
-          scope.show = false
-
-        tourist.on 'started', ->
-          scope.show = true
+        scope.tourist = tourist
     ]
 

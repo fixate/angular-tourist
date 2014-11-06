@@ -3,55 +3,45 @@ angular.module 'angular.tourist.demo', [
 ]
   .config ['touristProvider', ($tour) ->
     $tour.define
+      autostart: false
       stepDefault:
         activeClass: 'highlight'
-        position: 'south'
+        values:
+          position: "top left"
+      setup: ($event, tour, step) ->
+        console.log("[setup] step #{step.for}")
+      teardown: ($event, tour, step) ->
+        console.log("[teardown] step #{step.for}")
       steps: [
         {
           for: 'navigation'
-          content: 'This is the {{ name }}!'
+          content: 'This is the {{ values.name }}!'
           setup: ($scope) ->
-            $scope.extraNavItem = true
-            console.log('step 1 setup', @.activeStep)
+            $scope.navBorder = true
 
           teardown: ($scope) ->
-            $scope.extraNavItem = false
-            console.log('step 1 teardown', @.activeStep)
+            $scope.navBorder = false
 
           values:
             name: 'Sidenav'
-            position: 'north',
-            title: 'This has a title!'
+            title: 'Step 1'
         }
         {
           for: 'exitNav'
           content: 'Exit the site?!'
-          setup: ($scope) ->
-            console.log('step 2 setup', @.activeStep)
-
-          teardown: ($scope) ->
-            console.log('step 2 teardown', @.activeStep)
+          values:
+            position: "bottom left"
         }
         {
           for: 'image'
           content: 'This image is random'
-          setup: ($scope) ->
-            console.log('step 2 setup', @.activeStep)
-
-          teardown: ($scope) ->
-            console.log('step 2 teardown', @.activeStep)
+          values:
+            position: "center right"
         }
         {
           for: 'paragraph'
-          content: 'paragraph'
-          setup: ($scope) ->
-            console.log('step 2 setup', @.activeStep)
-
-          teardown: ($scope) ->
-            console.log('step 2 teardown', @.activeStep)
         }
       ]
-      autostart: false
   ]
 
   .controller 'DemoCtrl', ['$scope', 'tourist', ($scope, tourist) ->
@@ -69,35 +59,66 @@ angular.module 'angular.tourist.demo', [
   ]
 
   # Qtip wrapper directive
-	.directive 'uiTooltip', ['$compile', ($compile) ->
-		$ = angular.element
-		unless $.fn.qtip?
-			console.error?('QTip not included! Unable to use tooltip directive.')
+  .directive 'uiTooltip', ['$compile', ($compile) ->
+    $ = angular.element
+    unless $.fn.qtip?
+      console.error?('QTip not included! Unable to use tooltip directive.')
 
-		restrict: 'AEC'
-		scope:
-			content: '@'
-			onRender: '&'
-		link: (scope, element, attrs) ->
-			options = scope.$eval(attrs.uiTooltip) || {}
-			$ = angular.element
+    restrict: 'AEC'
+    transclude: true
+    scope:
+      content: '@'
+      onRender: '&'
+      reposition: '='
+      positionMy: '='
+    link: (scope, element, attrs, ctrl, $transclude) ->
+      options = scope.$eval(attrs.uiTooltip) || {}
+      $ = angular.element
 
-			el = $("<span>#{scope.content}</span>")
-			compiler = $compile(el)
+      qtip = (content) ->
+        angular.extend(options,
+          prerender: true
+          content:
+            text: content
+          hide:
+            event: false
+          show:
+            event: 'click'
+          position: scope.position
+          events:
+            render: (event, api) ->
+              scope.onRender(event: event, api: api)
+              return
+        )
 
-			$.extend(true, options,
-				content:
-					text: el
-				style:
-					tip:
-						width: 16
-						height: 8
-				events:
-					render: (event, api) ->
-						scope.onRender(event: event, api: api)
-						return
-			)
+        element.qtip(options).qtip('show')
 
-			element.qtip(options)
-			compiler(scope.$parent)
-	]
+      if scope.content
+        el = $("<span>#{scope.content}</span>")
+        compiler = $compile(el)
+        compiler(scope.$parent)
+        qtip(el)
+      else
+        $transclude (clone) ->
+          el = $("<span></span>")
+          el.append(clone)
+          qtip(el)
+          return
+
+      api = element.qtip('api')
+
+      scope.$watch 'content', (content) ->
+        api.set('content.text', content)
+
+      scope.$watch 'positionMy', (position) ->
+        return unless position?
+        api.set('position.my', position)
+
+      scope.$watch 'reposition', ->
+        api.reposition()
+
+      scope.$on '$destroy', ->
+        api.hide()
+
+      return
+  ]

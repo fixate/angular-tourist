@@ -32,35 +32,23 @@ angular.module('angular.tourist').directive('tourTemplate', [
             };
           };
           this.show = function(element, step) {
+            $scope.show = true;
             $scope.styles = angular.extend(_boundingOffset(element[0]), {
               position: 'absolute'
             });
-            if (step.values) {
-              angular.forEach(step.values, function(v, k) {
-                return $scope[k] = v;
-              });
-              return $scope.content = $interpolate(step.content)($scope);
-            }
+            $scope.values = step.values;
+            return $scope.content = $interpolate(step.content)($scope);
           };
           return this.hide = (function(_this) {
-            return function() {};
+            return function() {
+              return $scope.show = false;
+            };
           })(this);
         }
       ],
       link: function(scope, element, attrs, ctrl) {
         tourist.registerTemplate(scope.templateName, ctrl);
-        scope.next = function() {
-          return tourist.next();
-        };
-        scope.previous = function() {
-          return tourist.previous();
-        };
-        tourist.on('complete', function() {
-          return scope.show = false;
-        });
-        return tourist.on('started', function() {
-          return scope.show = true;
-        });
+        return scope.tourist = tourist;
       }
     };
   }

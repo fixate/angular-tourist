@@ -1,7 +1,9 @@
 class Tour
+  @PROPS = ['content', 'values']
+  @EVT_PROPS = ['setup', 'teardown', 'completed', 'started']
+
   constructor: (options) ->
     @options = options
-    @setSteps(options.steps)
     @elements = {}
     @templates = {}
     @reset()
@@ -19,6 +21,7 @@ class Tour
     @lastStep = null
 
   start: (at = 0) =>
+    @setSteps(@options.steps)
     unless @activeStep?
       @setActiveStep(at)
       @activate()
@@ -37,6 +40,15 @@ class Tour
     else
       @end()
 
+  hasNext: =>
+    @index < @steps.length - 1
+
+  hasPrevious: =>
+    @index > 0
+
+  isLastStep: =>
+    @index == @steps.length - 1
+
   previous: =>
     if @setActiveStep(@index - 1)
       @activate()
@@ -52,7 +64,7 @@ class Tour
   emit: (event, step = null) =>
     if step && fn = step[event]
       fn.apply(@, [@stepScope(step)])
-    Tour.$rootScope.$emit("$$tour-#{event}", @)
+    Tour.$rootScope.$emit("$$tour-#{event}", @, step)
 
   setActiveStep: (index) =>
     if index >= @steps.length
@@ -79,14 +91,35 @@ class Tour
   getTemplate: () =>
     @templates[@activeStep.template || 'default']
 
-  getElement: () =>
-    @elements[@activeStep.for]
+  getElement: (step = @activeStep) =>
+    @elements[step.for]
 
   setSteps: (steps) =>
     @steps = []
+    defaults = @options.stepDefault || {}
     for step in steps
-      @steps.push(angular.extend({}, @options.stepDefault || {}, step))
+      newStep = angular.extend({}, defaults || {}, step, @getElementStepData(step))
+      if defaults.values?
+        newStep.values = angular.extend({}, defaults.values, step.values)
+      @steps.push(newStep)
     return
+
+  getElementStepData: (step) =>
+    el = @getElement(step)
+    scope = el.scope()
+    stepData = {}
+    $parse = Tour.$parse
+    angular.forEach Tour.PROPS.concat(Tour.EVT_PROPS), (prop) =>
+      return unless value = el.attr("tour-#{prop}")
+      if prop in Tour.EVT_PROPS
+        value = $parse(value)
+      else if prop == 'values'
+        value = scope.$eval(value)
+
+      stepData[prop] = value
+
+    stepData
+
 
   getStep: () =>
     @steps[@index]
@@ -109,9 +142,10 @@ angular.module 'angular.tourist'
       _tourOptions = options
       return
 
-    @.$get = ['$injector', '$rootScope', ($injector, $rootScope) ->
+    @.$get = ['$injector', '$rootScope', '$parse', ($injector, $rootScope, $parse) ->
       Tour.$rootScope = $rootScope
       Tour.$injector = $injector
+      Tour.$parse = $parse
       new Tour(_tourOptions)
     ]
 

@@ -1,57 +1,49 @@
 angular.module('angular.tourist.demo', ['angular.tourist']).config([
   'touristProvider', function($tour) {
     return $tour.define({
+      autostart: false,
       stepDefault: {
         activeClass: 'highlight',
-        position: 'south'
+        values: {
+          position: "top left"
+        }
+      },
+      setup: function($event, tour, step) {
+        return console.log("[setup] step " + step["for"]);
+      },
+      teardown: function($event, tour, step) {
+        return console.log("[teardown] step " + step["for"]);
       },
       steps: [
         {
           "for": 'navigation',
-          content: 'This is the {{ name }}!',
+          content: 'This is the {{ values.name }}!',
           setup: function($scope) {
-            $scope.extraNavItem = true;
-            return console.log('step 1 setup', this.activeStep);
+            return $scope.navBorder = true;
           },
           teardown: function($scope) {
-            $scope.extraNavItem = false;
-            return console.log('step 1 teardown', this.activeStep);
+            return $scope.navBorder = false;
           },
           values: {
             name: 'Sidenav',
-            position: 'north',
-            title: 'This has a title!'
+            title: 'Step 1'
           }
         }, {
           "for": 'exitNav',
           content: 'Exit the site?!',
-          setup: function($scope) {
-            return console.log('step 2 setup', this.activeStep);
-          },
-          teardown: function($scope) {
-            return console.log('step 2 teardown', this.activeStep);
+          values: {
+            position: "bottom left"
           }
         }, {
           "for": 'image',
           content: 'This image is random',
-          setup: function($scope) {
-            return console.log('step 2 setup', this.activeStep);
-          },
-          teardown: function($scope) {
-            return console.log('step 2 teardown', this.activeStep);
+          values: {
+            position: "center right"
           }
         }, {
-          "for": 'paragraph',
-          content: 'paragraph',
-          setup: function($scope) {
-            return console.log('step 2 setup', this.activeStep);
-          },
-          teardown: function($scope) {
-            return console.log('step 2 teardown', this.activeStep);
-          }
+          "for": 'paragraph'
         }
-      ],
-      autostart: false
+      ]
     });
   }
 ]).controller('DemoCtrl', [
@@ -80,37 +72,69 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
     }
     return {
       restrict: 'AEC',
+      transclude: true,
       scope: {
         content: '@',
-        onRender: '&'
+        onRender: '&',
+        reposition: '=',
+        positionMy: '='
       },
-      link: function(scope, element, attrs) {
-        var compiler, el, options;
+      link: function(scope, element, attrs, ctrl, $transclude) {
+        var api, compiler, el, options, qtip;
         options = scope.$eval(attrs.uiTooltip) || {};
         $ = angular.element;
-        el = $("<span>" + scope.content + "</span>");
-        compiler = $compile(el);
-        $.extend(true, options, {
-          content: {
-            text: el
-          },
-          style: {
-            tip: {
-              width: 16,
-              height: 8
+        qtip = function(content) {
+          angular.extend(options, {
+            prerender: true,
+            content: {
+              text: content
+            },
+            hide: {
+              event: false
+            },
+            show: {
+              event: 'click'
+            },
+            position: scope.position,
+            events: {
+              render: function(event, api) {
+                scope.onRender({
+                  event: event,
+                  api: api
+                });
+              }
             }
-          },
-          events: {
-            render: function(event, api) {
-              scope.onRender({
-                event: event,
-                api: api
-              });
-            }
-          }
+          });
+          return element.qtip(options).qtip('show');
+        };
+        if (scope.content) {
+          el = $("<span>" + scope.content + "</span>");
+          compiler = $compile(el);
+          compiler(scope.$parent);
+          qtip(el);
+        } else {
+          $transclude(function(clone) {
+            el = $("<span></span>");
+            el.append(clone);
+            qtip(el);
+          });
+        }
+        api = element.qtip('api');
+        scope.$watch('content', function(content) {
+          return api.set('content.text', content);
         });
-        element.qtip(options);
-        return compiler(scope.$parent);
+        scope.$watch('positionMy', function(position) {
+          if (position == null) {
+            return;
+          }
+          return api.set('position.my', position);
+        });
+        scope.$watch('reposition', function() {
+          return api.reposition();
+        });
+        scope.$on('$destroy', function() {
+          return api.hide();
+        });
       }
     };
   }

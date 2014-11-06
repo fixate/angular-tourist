@@ -19,38 +19,42 @@ body ng-controller="DemoCtrl"
           button.alert ng-disabled="!tourStarted" ng-click="endTour()" End Tour
 
   .left
-    ul.side-nav tour-step="navigation"
+    ul.side-nav tour-step="navigation" ng-class="{'nav-border': navBorder}"
       li
         a href="#step1"  Step 1
       li
         a href="#step2"  Step 2
       li
         a href="#step3"  Step 3
-      li ng-if="extraNavItem"
-        a href="#" This shows on step#1
       li.divider
       li tour-step="exitNav"
         a href="#exit"  Exit
   .row
     .large-4.columns tour-step="image"
       img src="http://lorempixel.com/300/400/" /
-    .large-4.columns tour-step="paragraph"
-      p
+    .large-4.columns(
+      tour-step="paragraph"
+      tour-content="News flash!"
+      tour-setup="animate=true"
+      tour-teardown="animate=false"
+    )
+      p ng-class="{'animate-paragraph': animate}"
         | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
     .large-4.columns
 
   script id="angular/tour.html" type="text/ng-template"
-    /* div ui-tooltip="" content="<h3 ng-if='title'>{{ title }}</h3> {{ content }}"*/
-    div ng-style="styles" ng-if="show" class="tour_-highlight" ui-tooltip="" content="{{ content }}"
-      button ng-click="next()" Next
-      button ng-click="previous()" Prev
-    /* div*/
-    /*   h3 ng-if="title" {{ title }}*/
-    /*   p*/
-    /*     | {{ content }}*/
-    /*   button ng-disabled="!hasNext()" Next*/
+    div ng-style="styles" ng-if="show" class="tour_-highlight" ui-tooltip="" reposition="content" position-my="values.position"
+      h4 ng-if="values.title" style="color: red"
+        | {{ values.title }}
+      p
+        | {{ content }}
+      button ng-if="tourist.hasPrevious()" ng-click="tourist.previous()" Prev
+      button ng-if="tourist.hasNext()" ng-click="tourist.next()" Next
+      button ng-if="tourist.isLastStep()" ng-click="tourist.end()" End tour
+      small.right
+        | {{ values.position }}
 
-  div tour-template="" src="angular/tour.html" active-class="tour_-highlight"
+  div tour-template="" src="angular/tour.html"
 
   script src="bower_components/jquery/dist/jquery.js"
   script src="bower_components/qtip2/jquery.qtip.js"

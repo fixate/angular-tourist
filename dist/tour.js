@@ -1,12 +1,18 @@
 var Tour,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Tour = (function() {
+  Tour.PROPS = ['content', 'values'];
+
+  Tour.EVT_PROPS = ['setup', 'teardown', 'completed', 'started'];
+
   function Tour(options) {
     this.registerTemplate = __bind(this.registerTemplate, this);
     this.registerStep = __bind(this.registerStep, this);
     this.stepScope = __bind(this.stepScope, this);
     this.getStep = __bind(this.getStep, this);
+    this.getElementStepData = __bind(this.getElementStepData, this);
     this.setSteps = __bind(this.setSteps, this);
     this.getElement = __bind(this.getElement, this);
     this.getTemplate = __bind(this.getTemplate, this);
@@ -18,12 +24,14 @@ Tour = (function() {
     this.on = __bind(this.on, this);
     this.activate = __bind(this.activate, this);
     this.previous = __bind(this.previous, this);
+    this.isLastStep = __bind(this.isLastStep, this);
+    this.hasPrevious = __bind(this.hasPrevious, this);
+    this.hasNext = __bind(this.hasNext, this);
     this.next = __bind(this.next, this);
     this.end = __bind(this.end, this);
     this.start = __bind(this.start, this);
     this.reset = __bind(this.reset, this);
     this.options = options;
-    this.setSteps(options.steps);
     this.elements = {};
     this.templates = {};
     this.reset();
@@ -50,6 +58,7 @@ Tour = (function() {
     if (at == null) {
       at = 0;
     }
+    this.setSteps(this.options.steps);
     if (this.activeStep == null) {
       this.setActiveStep(at);
       this.activate();
@@ -72,6 +81,18 @@ Tour = (function() {
     } else {
       return this.end();
     }
+  };
+
+  Tour.prototype.hasNext = function() {
+    return this.index < this.steps.length - 1;
+  };
+
+  Tour.prototype.hasPrevious = function() {
+    return this.index > 0;
+  };
+
+  Tour.prototype.isLastStep = function() {
+    return this.index === this.steps.length - 1;
   };
 
   Tour.prototype.previous = function() {
@@ -100,7 +121,7 @@ Tour = (function() {
     if (step && (fn = step[event])) {
       fn.apply(this, [this.stepScope(step)]);
     }
-    return Tour.$rootScope.$emit("$$tour-" + event, this);
+    return Tour.$rootScope.$emit("$$tour-" + event, this, step);
   };
 
   Tour.prototype.setActiveStep = function(index) {
@@ -140,17 +161,48 @@ Tour = (function() {
     return this.templates[this.activeStep.template || 'default'];
   };
 
-  Tour.prototype.getElement = function() {
-    return this.elements[this.activeStep["for"]];
+  Tour.prototype.getElement = function(step) {
+    if (step == null) {
+      step = this.activeStep;
+    }
+    return this.elements[step["for"]];
   };
 
   Tour.prototype.setSteps = function(steps) {
-    var step, _i, _len;
+    var defaults, newStep, step, _i, _len;
     this.steps = [];
+    defaults = this.options.stepDefault || {};
     for (_i = 0, _len = steps.length; _i < _len; _i++) {
       step = steps[_i];
-      this.steps.push(angular.extend({}, this.options.stepDefault || {}, step));
+      newStep = angular.extend({}, defaults || {}, step, this.getElementStepData(step));
+      if (defaults.values != null) {
+        newStep.values = angular.extend({}, defaults.values, step.values);
+      }
+      this.steps.push(newStep);
     }
+  };
+
+  Tour.prototype.getElementStepData = function(step) {
+    var $parse, el, scope, stepData;
+    el = this.getElement(step);
+    scope = el.scope();
+    stepData = {};
+    $parse = Tour.$parse;
+    angular.forEach(Tour.PROPS.concat(Tour.EVT_PROPS), (function(_this) {
+      return function(prop) {
+        var value;
+        if (!(value = el.attr("tour-" + prop))) {
+          return;
+        }
+        if (__indexOf.call(Tour.EVT_PROPS, prop) >= 0) {
+          value = $parse(value);
+        } else if (prop === 'values') {
+          value = scope.$eval(value);
+        }
+        return stepData[prop] = value;
+      };
+    })(this));
+    return stepData;
   };
 
   Tour.prototype.getStep = function() {
@@ -182,9 +234,10 @@ angular.module('angular.tourist').provider('tourist', function() {
     };
   })(this);
   this.$get = [
-    '$injector', '$rootScope', function($injector, $rootScope) {
+    '$injector', '$rootScope', '$parse', function($injector, $rootScope, $parse) {
       Tour.$rootScope = $rootScope;
       Tour.$injector = $injector;
+      Tour.$parse = $parse;
       return new Tour(_tourOptions);
     }
   ];
