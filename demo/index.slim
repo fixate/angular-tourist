@@ -43,16 +43,16 @@ body ng-controller="DemoCtrl"
     .large-4.columns
 
   script id="angular/tour.html" type="text/ng-template"
-    div ng-style="styles" ng-if="show" class="tour_-highlight" ui-tooltip="" reposition="content" position-my="values.position"
-      h4 ng-if="values.title" style="color: red"
-        | {{ values.title }}
+    div ng-style="$pos" ng-if="$show" class="tour_-highlight" ui-tooltip="" reposition="$content" position-my="$data.position"
+      h4 ng-if="$data.title" style="color: red"
+        | {{ $data.title }}
       p
-        | {{ content }}
+        | {{ $content }}
       button ng-if="tourist.hasPrevious()" ng-click="tourist.previous()" Prev
       button ng-if="tourist.hasNext()" ng-click="tourist.next()" Next
       button ng-if="tourist.isLastStep()" ng-click="tourist.end()" End tour
       small.right
-        | {{ values.position }}
+        | {{ $data.position }}
 
   div tour-template="" src="angular/tour.html"
 

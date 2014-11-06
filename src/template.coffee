@@ -5,7 +5,7 @@ angular.module 'angular.tourist'
     (tourist, $window, $templateCache, $interpolate) ->
 
       $templateCache.put 'angular/tourist.html', '
-      <div ng-class="styles" ng-if="show" ng-class="class">
+      <div ng-class="styles" ng-if="$show" ng-class="class">
 
       </div>'
 
@@ -32,13 +32,13 @@ angular.module 'angular.tourist'
           }
 
         @show = (element, step) ->
-          $scope.show = true
-          $scope.styles = angular.extend(_boundingOffset(element[0]), {position: 'absolute'})
-          $scope.values = step.values
-          $scope.content = $interpolate(step.content)($scope)
+          $scope.$show = true
+          $scope.$pos = angular.extend(_boundingOffset(element[0]), {position: 'absolute'})
+          $scope.$data = step.data
+          $scope.$content = $interpolate(step.content)($scope)
 
         @hide = () =>
-          $scope.show = false
+          $scope.$show = false
       ]
       link: (scope, element, attrs, ctrl) ->
         tourist.registerTemplate(scope.templateName, ctrl)

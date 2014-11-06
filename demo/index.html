@@ -54,14 +54,14 @@
     <div class="large-4 columns"></div>
   </div>
   <script id="angular/tour.html" type="text/ng-template">
-    <div class="tour_-highlight" ng-if="show" ng-style="styles" position-my="values.position" reposition="content" ui-tooltip="">
-      <h4 ng-if="values.title" style="color: red">
-        {{ values.title }}
+    <div class="tour_-highlight" ng-if="$show" ng-style="$pos" position-my="$data.position" reposition="$content" ui-tooltip="">
+      <h4 ng-if="$data.title" style="color: red">
+        {{ $data.title }}
       </h4>
       <p>
-        {{ content }}
+        {{ $content }}
       </p>
-      <button ng-click="tourist.previous()" ng-if="tourist.hasPrevious()">Prev</button><button ng-click="tourist.next()" ng-if="tourist.hasNext()">Next</button><button ng-click="tourist.end()" ng-if="tourist.isLastStep()">End tour</button><small class="right">{{ values.position }}</small>
+      <button ng-click="tourist.previous()" ng-if="tourist.hasPrevious()">Prev</button><button ng-click="tourist.next()" ng-if="tourist.hasNext()">Next</button><button ng-click="tourist.end()" ng-if="tourist.isLastStep()">End tour</button><small class="right">{{ $data.position }}</small>
     </div>
   </script>
   <div src="angular/tour.html" tour-template=""></div>

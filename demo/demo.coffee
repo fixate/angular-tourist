@@ -6,7 +6,7 @@ angular.module 'angular.tourist.demo', [
       autostart: false
       stepDefault:
         activeClass: 'highlight'
-        values:
+        data:
           position: "top left"
       enter: ($event, tour, step) ->
         console.log("[enter] step #{step.for}")
@@ -15,27 +15,27 @@ angular.module 'angular.tourist.demo', [
       steps: [
         {
           for: 'navigation'
-          content: 'This is the {{ values.name }}!'
+          content: 'This is the {{ $data.name }}!'
           enter: ($scope) ->
             $scope.navBorder = true
 
           leave: ($scope) ->
             $scope.navBorder = false
 
-          values:
+          data:
             name: 'Sidenav'
             title: 'Step 1'
         }
         {
           for: 'exitNav'
           content: 'Exit the site?!'
-          values:
+          data:
             position: "bottom left"
         }
         {
           for: 'image'
           content: 'This image is random'
-          values:
+          data:
             position: "center right"
         }
         {

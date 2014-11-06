@@ -4,7 +4,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
       autostart: false,
       stepDefault: {
         activeClass: 'highlight',
-        values: {
+        data: {
           position: "top left"
         }
       },
@@ -17,27 +17,27 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
       steps: [
         {
           "for": 'navigation',
-          content: 'This is the {{ values.name }}!',
+          content: 'This is the {{ $data.name }}!',
           enter: function($scope) {
             return $scope.navBorder = true;
           },
           leave: function($scope) {
             return $scope.navBorder = false;
           },
-          values: {
+          data: {
             name: 'Sidenav',
             title: 'Step 1'
           }
         }, {
           "for": 'exitNav',
           content: 'Exit the site?!',
-          values: {
+          data: {
             position: "bottom left"
           }
         }, {
           "for": 'image',
           content: 'This image is random',
-          values: {
+          data: {
             position: "center right"
           }
         }, {

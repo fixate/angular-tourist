@@ -1,6 +1,6 @@
 angular.module('angular.tourist').directive('tourTemplate', [
   'tourist', '$window', '$templateCache', '$interpolate', function(tourist, $window, $templateCache, $interpolate) {
-    $templateCache.put('angular/tourist.html', '<div ng-class="styles" ng-if="show" ng-class="class"> </div>');
+    $templateCache.put('angular/tourist.html', '<div ng-class="styles" ng-if="$show" ng-class="class"> </div>');
     return {
       restrict: 'EA',
       templateUrl: function(element, attrs) {
@@ -32,16 +32,16 @@ angular.module('angular.tourist').directive('tourTemplate', [
             };
           };
           this.show = function(element, step) {
-            $scope.show = true;
-            $scope.styles = angular.extend(_boundingOffset(element[0]), {
+            $scope.$show = true;
+            $scope.$pos = angular.extend(_boundingOffset(element[0]), {
               position: 'absolute'
             });
-            $scope.values = step.values;
-            return $scope.content = $interpolate(step.content)($scope);
+            $scope.$data = step.data;
+            return $scope.$content = $interpolate(step.content)($scope);
           };
           return this.hide = (function(_this) {
             return function() {
-              return $scope.show = false;
+              return $scope.$show = false;
             };
           })(this);
         }
