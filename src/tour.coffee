@@ -106,6 +106,7 @@ class Tour
 
   getElementStepData: (step) =>
     el = @getElement(step)
+    return {} unless el?
     scope = el.scope()
     stepData = {}
     $parse = Tour.$parse
@@ -138,11 +139,12 @@ angular.module 'angular.tourist'
   .provider 'tourist', ->
     _tourOptions = null
 
-    @define = (options) =>
+    @define = (options) ->
       _tourOptions = options
       return
 
     @.$get = ['$injector', '$rootScope', '$parse', ($injector, $rootScope, $parse) ->
+      throw "You have not defined a tour configuration!" unless _tourOptions?
       Tour.$rootScope = $rootScope
       Tour.$injector = $injector
       Tour.$parse = $parse
