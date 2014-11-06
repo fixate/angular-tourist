@@ -16,7 +16,7 @@ You will need to:
 This is so that we can reuse these components for vastly different angular projects.
 
 Disclaimer: This is still in very early development. The API needs work and will change.
-            Having said that, it's usable and we are using it in production.
+            Having said that, it's usable and we are going to use it in production very soon.
             We plan on making this easier to understand and use.
 
 ## Installation
