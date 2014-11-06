@@ -5,7 +5,7 @@ var Tour,
 Tour = (function() {
   Tour.PROPS = ['content', 'values'];
 
-  Tour.EVT_PROPS = ['setup', 'teardown', 'completed', 'started'];
+  Tour.EVT_PROPS = ['enter', 'leave', 'completed', 'started'];
 
   function Tour(options) {
     this.registerTemplate = __bind(this.registerTemplate, this);
@@ -16,8 +16,8 @@ Tour = (function() {
     this.setSteps = __bind(this.setSteps, this);
     this.getElement = __bind(this.getElement, this);
     this.getTemplate = __bind(this.getTemplate, this);
-    this.teardown = __bind(this.teardown, this);
-    this.setup = __bind(this.setup, this);
+    this.leave = __bind(this.leave, this);
+    this.enter = __bind(this.enter, this);
     this.showStep = __bind(this.showStep, this);
     this.setActiveStep = __bind(this.setActiveStep, this);
     this.emit = __bind(this.emit, this);
@@ -35,14 +35,14 @@ Tour = (function() {
     this.elements = {};
     this.templates = {};
     this.reset();
-    if (options.setup != null) {
-      this.on('setup', options.setup);
+    if (options.enter != null) {
+      this.on('enter', options.enter);
     }
-    if (options.teardown != null) {
-      this.on('teardown', options.teardown);
+    if (options.leave != null) {
+      this.on('leave', options.leave);
     }
-    this.on('setup', this.setup);
-    this.on('teardown', this.teardown);
+    this.on('enter', this.enter);
+    this.on('leave', this.leave);
     if (this.options.autostart) {
       this.start();
     }
@@ -68,7 +68,7 @@ Tour = (function() {
 
   Tour.prototype.end = function() {
     if (this.activeStep != null) {
-      this.emit('teardown', this.activeStep);
+      this.emit('leave', this.activeStep);
       this.getTemplate().hide();
       this.emit('complete');
       return this.reset();
@@ -103,9 +103,9 @@ Tour = (function() {
 
   Tour.prototype.activate = function() {
     if (this.lastStep != null) {
-      this.emit('teardown', this.lastStep);
+      this.emit('leave', this.lastStep);
     }
-    this.emit('setup', this.activeStep);
+    this.emit('enter', this.activeStep);
     return this.showStep();
   };
 
@@ -141,7 +141,7 @@ Tour = (function() {
     return this.getTemplate().show(this.getElement(), this.activeStep);
   };
 
-  Tour.prototype.setup = function() {
+  Tour.prototype.enter = function() {
     var el;
     el = this.getElement();
     if (this.activeStep.activeClass != null) {
@@ -149,7 +149,7 @@ Tour = (function() {
     }
   };
 
-  Tour.prototype.teardown = function() {
+  Tour.prototype.leave = function() {
     var el;
     el = this.getElement();
     if (this.activeStep.activeClass != null) {

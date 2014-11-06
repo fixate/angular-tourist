@@ -8,20 +8,20 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
           position: "top left"
         }
       },
-      setup: function($event, tour, step) {
-        return console.log("[setup] step " + step["for"]);
+      enter: function($event, tour, step) {
+        return console.log("[enter] step " + step["for"]);
       },
-      teardown: function($event, tour, step) {
-        return console.log("[teardown] step " + step["for"]);
+      leave: function($event, tour, step) {
+        return console.log("[leave] step " + step["for"]);
       },
       steps: [
         {
           "for": 'navigation',
           content: 'This is the {{ values.name }}!',
-          setup: function($scope) {
+          enter: function($scope) {
             return $scope.navBorder = true;
           },
-          teardown: function($scope) {
+          leave: function($scope) {
             return $scope.navBorder = false;
           },
           values: {

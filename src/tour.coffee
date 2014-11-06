@@ -1,16 +1,16 @@
 class Tour
   @PROPS = ['content', 'values']
-  @EVT_PROPS = ['setup', 'teardown', 'completed', 'started']
+  @EVT_PROPS = ['enter', 'leave', 'completed', 'started']
 
   constructor: (options) ->
     @options = options
     @elements = {}
     @templates = {}
     @reset()
-    @on('setup', options.setup) if options.setup?
-    @on('teardown', options.teardown) if options.teardown?
-    @on('setup', @setup)
-    @on('teardown', @teardown)
+    @on('enter', options.enter) if options.enter?
+    @on('leave', options.leave) if options.leave?
+    @on('enter', @enter)
+    @on('leave', @leave)
 
     if @options.autostart
       @start()
@@ -29,7 +29,7 @@ class Tour
 
   end: =>
     if @activeStep?
-      @emit('teardown', @activeStep)
+      @emit('leave', @activeStep)
       @getTemplate().hide()
       @emit('complete')
       @reset()
@@ -54,8 +54,8 @@ class Tour
       @activate()
 
   activate: () =>
-    @emit('teardown', @lastStep) if @lastStep?
-    @emit('setup', @activeStep)
+    @emit('leave', @lastStep) if @lastStep?
+    @emit('enter', @activeStep)
     @showStep()
 
   on: (event, handler) =>
@@ -78,12 +78,12 @@ class Tour
   showStep: () =>
     @getTemplate().show(@getElement(), @activeStep)
 
-  setup: () =>
+  enter: () =>
     el = @getElement()
     if @activeStep.activeClass?
       el.addClass(@activeStep.activeClass)
 
-  teardown: () =>
+  leave: () =>
     el = @getElement()
     if @activeStep.activeClass?
       el.removeClass(@activeStep.activeClass)

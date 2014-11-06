@@ -8,18 +8,18 @@ angular.module 'angular.tourist.demo', [
         activeClass: 'highlight'
         values:
           position: "top left"
-      setup: ($event, tour, step) ->
-        console.log("[setup] step #{step.for}")
-      teardown: ($event, tour, step) ->
-        console.log("[teardown] step #{step.for}")
+      enter: ($event, tour, step) ->
+        console.log("[enter] step #{step.for}")
+      leave: ($event, tour, step) ->
+        console.log("[leave] step #{step.for}")
       steps: [
         {
           for: 'navigation'
           content: 'This is the {{ values.name }}!'
-          setup: ($scope) ->
+          enter: ($scope) ->
             $scope.navBorder = true
 
-          teardown: ($scope) ->
+          leave: ($scope) ->
             $scope.navBorder = false
 
           values:
