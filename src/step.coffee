@@ -1,7 +1,7 @@
 angular.module 'angular.tourist'
 
-  .directive 'tourStep', ['tourist', (tourist) ->
+  .directive 'tourStep', ['$tourist', ($tourist) ->
     restrict: 'EAC'
     link: (scope, element, attrs) ->
-      tourist.registerStep(attrs.tourStep, element)
+      $tourist.registerStep(attrs.tourStep, element)
   ]

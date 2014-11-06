@@ -2,10 +2,8 @@ class Tour
   @PROPS = ['content', 'values']
   @EVT_PROPS = ['enter', 'leave', 'completed', 'started']
 
-  constructor: (options) ->
+  constructor: (@name, options) ->
     @options = options
-    @elements = {}
-    @templates = {}
     @reset()
     @on('enter', options.enter) if options.enter?
     @on('leave', options.leave) if options.leave?
@@ -59,7 +57,7 @@ class Tour
     @showStep()
 
   on: (event, handler) =>
-    Tour.$rootScope.$on("$$tour-#{event}", handler)
+    Tour.$rootScope.$on("$$tour-#{@name}-#{event}", handler)
 
   emit: (event, step = null) =>
     if step && fn = step[event]
@@ -76,7 +74,9 @@ class Tour
       true
 
   showStep: () =>
-    @getTemplate().show(@getElement(), @activeStep)
+    template = @getTemplate()
+    template.setTour(@)
+    template.show(@getElement(), @activeStep)
 
   enter: () =>
     el = @getElement()
@@ -89,10 +89,10 @@ class Tour
       el.removeClass(@activeStep.activeClass)
 
   getTemplate: () =>
-    @templates[@activeStep.template || 'default']
+    Tour.templates[@activeStep.template || 'default']
 
   getElement: (step = @activeStep) =>
-    @elements[step.for]
+    Tour.elements[step.for]
 
   setSteps: (steps) =>
     @steps = []
@@ -121,34 +121,51 @@ class Tour
 
     stepData
 
-
   getStep: () =>
     @steps[@index]
 
   stepScope: (step) =>
-    angular.element(@elements[step.for]).scope()
+    angular.element(@getElement(step)).scope()
 
-  registerStep: (name, element) =>
-    @elements[name] = element
-
-  registerTemplate: (name, ctrl) =>
-    @templates[name || 'default'] = ctrl
 
 angular.module 'angular.tourist'
 
-  .provider 'tourist', ->
-    _tourOptions = null
+  .provider '$tourist', ->
+    _tourOpts = {}
+    _elements = {}
+    _templates = {}
 
-    @define = (options) ->
-      _tourOptions = options
+    @define = (name, options) ->
+      if typeof name == 'object'
+        options = name
+        name = 'default'
+
+      _tourOpts[name] = options
       return
 
-    @.$get = ['$injector', '$rootScope', '$parse', ($injector, $rootScope, $parse) ->
-      throw "You have not defined a tour configuration!" unless _tourOptions?
+    @.$get = ['$rootScope', '$parse', ($rootScope, $parse) ->
+      _tours = {}
+
+      # Tour dependencies
       Tour.$rootScope = $rootScope
-      Tour.$injector = $injector
       Tour.$parse = $parse
-      new Tour(_tourOptions)
+      Tour.elements = _elements
+      Tour.templates = _templates
+
+      {
+        get: (name = 'default') ->
+          throw "You have not defined a tour configuration for #{name}!" unless _tourOpts[name]?
+          _tours[name] ||= new Tour(name, _tourOpts[name])
+
+        registerStep: (name, element) ->
+          _elements[name] = element
+
+        registerTemplate: (name, ctrl) ->
+          if typeof name == 'object'
+            ctrl = name
+            name = 'default'
+          _templates[name || 'default'] = ctrl
+      }
     ]
 
     return

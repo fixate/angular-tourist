@@ -48,9 +48,9 @@ body ng-controller="DemoCtrl"
         | {{ $data.title }}
       p
         | {{ $content }}
-      button ng-if="tourist.hasPrevious()" ng-click="tourist.previous()" Prev
-      button ng-if="tourist.hasNext()" ng-click="tourist.next()" Next
-      button ng-if="tourist.isLastStep()" ng-click="tourist.end()" End tour
+      button ng-if="$hasPrevious()" ng-click="$previous()" Prev
+      button ng-if="$hasNext()" ng-click="$next()" Next
+      button ng-if="$isLastStep()" ng-click="$end()" End tour
       small.right
         | {{ $data.position }}
 

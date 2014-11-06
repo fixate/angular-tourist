@@ -1,6 +1,6 @@
 angular.module('angular.tourist.demo', ['angular.tourist']).config([
-  'touristProvider', function($tour) {
-    return $tour.define({
+  '$touristProvider', function($tour) {
+    return $tour.define('main', {
       autostart: false,
       stepDefault: {
         activeClass: 'highlight',
@@ -47,17 +47,19 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
     });
   }
 ]).controller('DemoCtrl', [
-  '$scope', 'tourist', function($scope, tourist) {
+  '$scope', '$tourist', function($scope, $tourist) {
+    var tour;
+    tour = $tourist.get('main');
     $scope.startTour = function() {
-      return tourist.start();
+      return tour.start();
     };
     $scope.endTour = function() {
-      return tourist.end();
+      return tour.end();
     };
-    tourist.on('started', function() {
+    tour.on('started', function() {
       return $scope.tourStarted = true;
     });
-    return tourist.on('complete', function() {
+    return tour.on('complete', function() {
       return $scope.tourStarted = false;
     });
   }
