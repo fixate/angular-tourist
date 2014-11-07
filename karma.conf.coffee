@@ -15,7 +15,14 @@ module.exports = (config) ->
 
     # list of files / patterns to load in the browser
     files: [
-      'test/**/*Spec.coffee'
+      'bower_components/angular/angular.js'
+      'bower_components/angular-mocks/angular-mocks.js'
+      'dist/dev/module.js'
+      'dist/dev/step.js'
+      'dist/dev/template.js'
+      'dist/dev/tour.js'
+      'test/**/*.html'
+      'test/**/*_spec.coffee'
     ]
 
 
@@ -28,6 +35,7 @@ module.exports = (config) ->
     # available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       '**/*.coffee': ['coffee']
+      'test/**/*.html': ['html2js']
     }
 
 

@@ -59,7 +59,7 @@ gulp.task 'uglify', ['concat'], () ->
     .pipe rename('angular-tourist.min.js')
     .pipe gulp.dest('./dist/')
 
-gulp.task 'test', ->
+gulp.task 'test', ['coffee'], ->
   karma.start(configFile: "#{__dirname}/karma.conf.coffee")
 
 gulp.task 'build', ['coffee', 'uglify']
