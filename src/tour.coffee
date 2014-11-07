@@ -57,12 +57,21 @@ class Tour
     @showStep()
 
   on: (event, handler) =>
-    Tour.$rootScope.$on("$$tour-#{@name}-#{event}", handler)
+    _this = @
+    Tour.$rootScope.$on "$$tour-#{@name}-#{event}", (_, $scope, $step) ->
+      Tour.$injector.invoke(handler, _this, $scope: $scope, $step: $step)
 
   emit: (event, step = null) =>
-    if step && fn = step[event]
-      fn.apply(@, [@stepScope(step)])
-    Tour.$rootScope.$emit("$$tour-#{@name} -#{event}", @, step)
+    $scope = null
+    if step
+      $scope = @stepScope(step)
+      if fn = step[event]
+        # HACK: This to detect an inline function which cannot be invoked with the injector
+        if fn.$$watchDelegate?
+          fn($scope)
+        else
+          Tour.$injector.invoke(fn, @, $scope: $scope, $step: step)
+    Tour.$rootScope.$emit("$$tour-#{@name}-#{event}", $scope, step)
 
   setActiveStep: (index) =>
     if index >= @steps.length
@@ -132,7 +141,7 @@ angular.module 'angular.tourist'
 
   .provider '$tourist', ->
     _tourOpts = {}
-    _elements = {}
+    _stepElements = {}
     _templates = {}
 
     @define = (name, options) ->
@@ -143,22 +152,25 @@ angular.module 'angular.tourist'
       _tourOpts[name] = options
       return
 
-    @.$get = ['$rootScope', '$parse', ($rootScope, $parse) ->
+    @.$get = ['$rootScope', '$parse', '$injector', ($rootScope, $parse, $injector) ->
       _tours = {}
 
       # Tour dependencies
       Tour.$rootScope = $rootScope
       Tour.$parse = $parse
-      Tour.elements = _elements
+      Tour.$injector = $injector
+      Tour.elements = _stepElements
       Tour.templates = _templates
 
       {
         get: (name = 'default') ->
           throw "You have not defined a tour configuration for #{name}!" unless _tourOpts[name]?
+          throw "You have not defined any templates for the tour!" if _templates.length == 0
+          throw "You have not defined any steps for the tour!" if _stepElements.length == 0
           _tours[name] ||= new Tour(name, _tourOpts[name])
 
         registerStep: (name, element) ->
-          _elements[name] = element
+          _stepElements[name] = element
 
         registerTemplate: (name, ctrl) ->
           if typeof name == 'object'
