@@ -212,7 +212,7 @@ Tour = (function() {
     if (step) {
       $scope = this.stepScope(step);
       if (fn = step[event]) {
-        if (fn.$$watchDelegate != null) {
+        if (fn.$$tourParsed != null) {
           fn($scope);
         } else {
           Tour.$injector.invoke(fn, this, {
@@ -303,6 +303,7 @@ Tour = (function() {
         }
         if (__indexOf.call(Tour.EVT_PROPS, prop) >= 0) {
           value = $parse(value);
+          value.$$tourParsed = true;
         } else if (prop === 'data') {
           value = scope.$eval(value);
         }

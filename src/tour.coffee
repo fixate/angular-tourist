@@ -66,8 +66,9 @@ class Tour
     if step
       $scope = @stepScope(step)
       if fn = step[event]
-        # HACK: This to detect an inline function which cannot be invoked with the injector
-        if fn.$$watchDelegate?
+        # HACK: This to detect an inline function which cannot be invoked
+        # with the injector
+        if fn.$$tourParsed?
           fn($scope)
         else
           Tour.$injector.invoke(fn, @, $scope: $scope, $step: step)
@@ -123,6 +124,7 @@ class Tour
       return unless value = el.attr("tour-#{prop}")
       if prop in Tour.EVT_PROPS
         value = $parse(value)
+        value.$$tourParsed = true
       else if prop == 'data'
         value = scope.$eval(value)
 
