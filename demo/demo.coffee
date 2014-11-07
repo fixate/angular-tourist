@@ -8,19 +8,23 @@ angular.module 'angular.tourist.demo', [
         activeClass: 'highlight'
         data:
           position: "top left"
-      enter: ($event, tour, step) ->
-        console.log("[enter] step #{step.for}")
-      leave: ($event, tour, step) ->
-        console.log("[leave] step #{step.for}")
+      enter: ['$step', ($step) ->
+        console.log("[enter] step #{$step.for}")
+      ]
+      leave: ['$step', ($step) ->
+        console.log("[leave] step #{$step.for}")
+      ]
       steps: [
         {
           for: 'navigation'
           content: 'This is the {{ $data.name }}!'
-          enter: ($scope) ->
+          enter: ['$scope', ($scope) ->
             $scope.navBorder = true
+          ]
 
-          leave: ($scope) ->
+          leave: ['$scope', ($scope) ->
             $scope.navBorder = false
+          ]
 
           data:
             name: 'Sidenav'
