@@ -62,7 +62,7 @@ class Tour
   emit: (event, step = null) =>
     if step && fn = step[event]
       fn.apply(@, [@stepScope(step)])
-    Tour.$rootScope.$emit("$$tour-#{event}", @, step)
+    Tour.$rootScope.$emit("$$tour-#{@name} -#{event}", @, step)
 
   setActiveStep: (index) =>
     if index >= @steps.length

@@ -118,7 +118,7 @@ Tour = (function() {
     if (step && (fn = step[event])) {
       fn.apply(this, [this.stepScope(step)]);
     }
-    return Tour.$rootScope.$emit("$$tour-" + event, this, step);
+    return Tour.$rootScope.$emit("$$tour-" + this.name + " -" + event, this, step);
   };
 
   Tour.prototype.setActiveStep = function(index) {
