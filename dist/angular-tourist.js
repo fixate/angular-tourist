@@ -1,18 +1,18 @@
 angular.module('angular.tourist', []);
 
 angular.module('angular.tourist').directive('tourStep', [
-  'tourist', function(tourist) {
+  '$tourist', function($tourist) {
     return {
       restrict: 'EAC',
       link: function(scope, element, attrs) {
-        return tourist.registerStep(attrs.tourStep, element);
+        return $tourist.registerStep(attrs.tourStep, element);
       }
     };
   }
 ]);
 
 angular.module('angular.tourist').directive('tourTemplate', [
-  'tourist', '$window', '$templateCache', '$interpolate', function(tourist, $window, $templateCache, $interpolate) {
+  '$tourist', '$window', '$templateCache', '$interpolate', function($tourist, $window, $templateCache, $interpolate) {
     $templateCache.put('angular/tourist.html', '<div ng-class="styles" ng-if="$show" ng-class="class"> </div>');
     return {
       restrict: 'EA',
@@ -24,7 +24,7 @@ angular.module('angular.tourist').directive('tourTemplate', [
         "class": '@activeClass'
       },
       controller: [
-        '$scope', 'tourist', function($scope, tourist) {
+        '$scope', function($scope) {
           var _boundingOffset;
           _boundingOffset = function(element) {
             var box, doc, documentElem;
@@ -52,16 +52,33 @@ angular.module('angular.tourist').directive('tourTemplate', [
             $scope.$data = step.data;
             return $scope.$content = $interpolate(step.content)($scope);
           };
-          return this.hide = (function(_this) {
-            return function() {
-              return $scope.$show = false;
+          this.hide = function() {
+            return $scope.$show = false;
+          };
+          this.setTour = function($tour) {
+            $scope.$next = function() {
+              return $tour.next();
             };
-          })(this);
+            $scope.$previous = function() {
+              return $tour.previous();
+            };
+            $scope.$hasNext = function() {
+              return $tour.hasNext();
+            };
+            $scope.$hasPrevious = function() {
+              return $tour.hasPrevious();
+            };
+            $scope.$end = function() {
+              return $tour.end();
+            };
+            return $scope.$isLastStep = function() {
+              return $tour.isLastStep();
+            };
+          };
         }
       ],
       link: function(scope, element, attrs, ctrl) {
-        tourist.registerTemplate(scope.templateName, ctrl);
-        return scope.tourist = tourist;
+        $tourist.registerTemplate(scope.templateName, ctrl);
       }
     };
   }
@@ -72,13 +89,12 @@ var Tour,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Tour = (function() {
-  Tour.PROPS = ['content', 'values'];
+  Tour.PROPS = ['content', 'data'];
 
   Tour.EVT_PROPS = ['enter', 'leave', 'completed', 'started'];
 
-  function Tour(options) {
-    this.registerTemplate = __bind(this.registerTemplate, this);
-    this.registerStep = __bind(this.registerStep, this);
+  function Tour(name, options) {
+    this.name = name;
     this.stepScope = __bind(this.stepScope, this);
     this.getStep = __bind(this.getStep, this);
     this.getElementStepData = __bind(this.getElementStepData, this);
@@ -101,8 +117,6 @@ Tour = (function() {
     this.start = __bind(this.start, this);
     this.reset = __bind(this.reset, this);
     this.options = options;
-    this.elements = {};
-    this.templates = {};
     this.reset();
     if (options.enter != null) {
       this.on('enter', options.enter);
@@ -179,7 +193,7 @@ Tour = (function() {
   };
 
   Tour.prototype.on = function(event, handler) {
-    return Tour.$rootScope.$on("$$tour-" + event, handler);
+    return Tour.$rootScope.$on("$$tour-" + this.name + "-" + event, handler);
   };
 
   Tour.prototype.emit = function(event, step) {
@@ -190,7 +204,7 @@ Tour = (function() {
     if (step && (fn = step[event])) {
       fn.apply(this, [this.stepScope(step)]);
     }
-    return Tour.$rootScope.$emit("$$tour-" + event, this, step);
+    return Tour.$rootScope.$emit("$$tour-" + this.name + " -" + event, this, step);
   };
 
   Tour.prototype.setActiveStep = function(index) {
@@ -207,7 +221,10 @@ Tour = (function() {
   };
 
   Tour.prototype.showStep = function() {
-    return this.getTemplate().show(this.getElement(), this.activeStep);
+    var template;
+    template = this.getTemplate();
+    template.setTour(this);
+    return template.show(this.getElement(), this.activeStep);
   };
 
   Tour.prototype.enter = function() {
@@ -227,14 +244,14 @@ Tour = (function() {
   };
 
   Tour.prototype.getTemplate = function() {
-    return this.templates[this.activeStep.template || 'default'];
+    return Tour.templates[this.activeStep.template || 'default'];
   };
 
   Tour.prototype.getElement = function(step) {
     if (step == null) {
       step = this.activeStep;
     }
-    return this.elements[step["for"]];
+    return Tour.elements[step["for"]];
   };
 
   Tour.prototype.setSteps = function(steps) {
@@ -244,8 +261,8 @@ Tour = (function() {
     for (_i = 0, _len = steps.length; _i < _len; _i++) {
       step = steps[_i];
       newStep = angular.extend({}, defaults || {}, step, this.getElementStepData(step));
-      if (defaults.values != null) {
-        newStep.values = angular.extend({}, defaults.values, step.values);
+      if (defaults.data != null) {
+        newStep.data = angular.extend({}, defaults.data, step.data);
       }
       this.steps.push(newStep);
     }
@@ -254,6 +271,9 @@ Tour = (function() {
   Tour.prototype.getElementStepData = function(step) {
     var $parse, el, scope, stepData;
     el = this.getElement(step);
+    if (el == null) {
+      return {};
+    }
     scope = el.scope();
     stepData = {};
     $parse = Tour.$parse;
@@ -265,7 +285,7 @@ Tour = (function() {
         }
         if (__indexOf.call(Tour.EVT_PROPS, prop) >= 0) {
           value = $parse(value);
-        } else if (prop === 'values') {
+        } else if (prop === 'data') {
           value = scope.$eval(value);
         }
         return stepData[prop] = value;
@@ -279,35 +299,54 @@ Tour = (function() {
   };
 
   Tour.prototype.stepScope = function(step) {
-    return angular.element(this.elements[step["for"]]).scope();
-  };
-
-  Tour.prototype.registerStep = function(name, element) {
-    return this.elements[name] = element;
-  };
-
-  Tour.prototype.registerTemplate = function(name, ctrl) {
-    return this.templates[name || 'default'] = ctrl;
+    return angular.element(this.getElement(step)).scope();
   };
 
   return Tour;
 
 })();
 
-angular.module('angular.tourist').provider('tourist', function() {
-  var _tourOptions;
-  _tourOptions = null;
-  this.define = (function(_this) {
-    return function(options) {
-      _tourOptions = options;
-    };
-  })(this);
+angular.module('angular.tourist').provider('$tourist', function() {
+  var _elements, _templates, _tourOpts;
+  _tourOpts = {};
+  _elements = {};
+  _templates = {};
+  this.define = function(name, options) {
+    if (typeof name === 'object') {
+      options = name;
+      name = 'default';
+    }
+    _tourOpts[name] = options;
+  };
   this.$get = [
-    '$injector', '$rootScope', '$parse', function($injector, $rootScope, $parse) {
+    '$rootScope', '$parse', function($rootScope, $parse) {
+      var _tours;
+      _tours = {};
       Tour.$rootScope = $rootScope;
-      Tour.$injector = $injector;
       Tour.$parse = $parse;
-      return new Tour(_tourOptions);
+      Tour.elements = _elements;
+      Tour.templates = _templates;
+      return {
+        get: function(name) {
+          if (name == null) {
+            name = 'default';
+          }
+          if (_tourOpts[name] == null) {
+            throw "You have not defined a tour configuration for " + name + "!";
+          }
+          return _tours[name] || (_tours[name] = new Tour(name, _tourOpts[name]));
+        },
+        registerStep: function(name, element) {
+          return _elements[name] = element;
+        },
+        registerTemplate: function(name, ctrl) {
+          if (typeof name === 'object') {
+            ctrl = name;
+            name = 'default';
+          }
+          return _templates[name || 'default'] = ctrl;
+        }
+      };
     }
   ];
 });
