@@ -3,7 +3,7 @@ var Tour,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Tour = (function() {
-  Tour.PROPS = ['content', 'values'];
+  Tour.PROPS = ['content', 'data'];
 
   Tour.EVT_PROPS = ['enter', 'leave', 'completed', 'started'];
 
@@ -175,8 +175,8 @@ Tour = (function() {
     for (_i = 0, _len = steps.length; _i < _len; _i++) {
       step = steps[_i];
       newStep = angular.extend({}, defaults || {}, step, this.getElementStepData(step));
-      if (defaults.values != null) {
-        newStep.values = angular.extend({}, defaults.values, step.values);
+      if (defaults.data != null) {
+        newStep.data = angular.extend({}, defaults.data, step.data);
       }
       this.steps.push(newStep);
     }
@@ -199,7 +199,7 @@ Tour = (function() {
         }
         if (__indexOf.call(Tour.EVT_PROPS, prop) >= 0) {
           value = $parse(value);
-        } else if (prop === 'values') {
+        } else if (prop === 'data') {
           value = scope.$eval(value);
         }
         return stepData[prop] = value;

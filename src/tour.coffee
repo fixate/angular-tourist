@@ -1,5 +1,5 @@
 class Tour
-  @PROPS = ['content', 'values']
+  @PROPS = ['content', 'data']
   @EVT_PROPS = ['enter', 'leave', 'completed', 'started']
 
   constructor: (@name, options) ->
@@ -99,8 +99,8 @@ class Tour
     defaults = @options.stepDefault || {}
     for step in steps
       newStep = angular.extend({}, defaults || {}, step, @getElementStepData(step))
-      if defaults.values?
-        newStep.values = angular.extend({}, defaults.values, step.values)
+      if defaults.data?
+        newStep.data = angular.extend({}, defaults.data, step.data)
       @steps.push(newStep)
     return
 
@@ -114,7 +114,7 @@ class Tour
       return unless value = el.attr("tour-#{prop}")
       if prop in Tour.EVT_PROPS
         value = $parse(value)
-      else if prop == 'values'
+      else if prop == 'data'
         value = scope.$eval(value)
 
       stepData[prop] = value
