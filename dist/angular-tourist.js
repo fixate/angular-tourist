@@ -193,18 +193,36 @@ Tour = (function() {
   };
 
   Tour.prototype.on = function(event, handler) {
-    return Tour.$rootScope.$on("$$tour-" + this.name + "-" + event, handler);
+    var _this;
+    _this = this;
+    return Tour.$rootScope.$on("$$tour-" + this.name + "-" + event, function(_, $scope, $step) {
+      return Tour.$injector.invoke(handler, _this, {
+        $scope: $scope,
+        $step: $step
+      });
+    });
   };
 
   Tour.prototype.emit = function(event, step) {
-    var fn;
+    var $scope, fn;
     if (step == null) {
       step = null;
     }
-    if (step && (fn = step[event])) {
-      fn.apply(this, [this.stepScope(step)]);
+    $scope = null;
+    if (step) {
+      $scope = this.stepScope(step);
+      if (fn = step[event]) {
+        if (fn.$$watchDelegate != null) {
+          fn($scope);
+        } else {
+          Tour.$injector.invoke(fn, this, {
+            $scope: $scope,
+            $step: step
+          });
+        }
+      }
     }
-    return Tour.$rootScope.$emit("$$tour-" + this.name + " -" + event, this, step);
+    return Tour.$rootScope.$emit("$$tour-" + this.name + "-" + event, $scope, step);
   };
 
   Tour.prototype.setActiveStep = function(index) {
@@ -307,9 +325,9 @@ Tour = (function() {
 })();
 
 angular.module('angular.tourist').provider('$tourist', function() {
-  var _elements, _templates, _tourOpts;
+  var _stepElements, _templates, _tourOpts;
   _tourOpts = {};
-  _elements = {};
+  _stepElements = {};
   _templates = {};
   this.define = function(name, options) {
     if (typeof name === 'object') {
@@ -319,12 +337,13 @@ angular.module('angular.tourist').provider('$tourist', function() {
     _tourOpts[name] = options;
   };
   this.$get = [
-    '$rootScope', '$parse', function($rootScope, $parse) {
+    '$rootScope', '$parse', '$injector', function($rootScope, $parse, $injector) {
       var _tours;
       _tours = {};
       Tour.$rootScope = $rootScope;
       Tour.$parse = $parse;
-      Tour.elements = _elements;
+      Tour.$injector = $injector;
+      Tour.elements = _stepElements;
       Tour.templates = _templates;
       return {
         get: function(name) {
@@ -334,10 +353,16 @@ angular.module('angular.tourist').provider('$tourist', function() {
           if (_tourOpts[name] == null) {
             throw "You have not defined a tour configuration for " + name + "!";
           }
+          if (_templates.length === 0) {
+            throw "You have not defined any templates for the tour!";
+          }
+          if (_stepElements.length === 0) {
+            throw "You have not defined any steps for the tour!";
+          }
           return _tours[name] || (_tours[name] = new Tour(name, _tourOpts[name]));
         },
         registerStep: function(name, element) {
-          return _elements[name] = element;
+          return _stepElements[name] = element;
         },
         registerTemplate: function(name, ctrl) {
           if (typeof name === 'object') {
