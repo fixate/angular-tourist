@@ -8,6 +8,7 @@ slim = require 'gulp-slim'
 uglify = require 'gulp-uglify'
 concat = require 'gulp-concat'
 rename = require 'gulp-rename'
+karma = require('karma').server
 
 COFFEE_FILES = [
   './src/module.coffee'
@@ -57,6 +58,9 @@ gulp.task 'uglify', ['concat'], () ->
     .pipe uglify()
     .pipe rename('angular-tourist.min.js')
     .pipe gulp.dest('./dist/')
+
+gulp.task 'test', ['coffee'], ->
+  karma.start(configFile: "#{__dirname}/karma.conf.coffee")
 
 gulp.task 'build', ['coffee', 'uglify']
 
