@@ -1,8 +1,8 @@
 angular.module 'angular.tourist'
 
   .directive 'tourTemplate', [
-    'tourist', '$window', '$templateCache', '$interpolate',
-    (tourist, $window, $templateCache, $interpolate) ->
+    '$tourist', '$window', '$templateCache', '$interpolate',
+    ($tourist, $window, $templateCache, $interpolate) ->
 
       $templateCache.put 'angular/tourist.html', '
       <div ng-class="styles" ng-if="$show" ng-class="class">
@@ -14,7 +14,7 @@ angular.module 'angular.tourist'
       scope:
         templateName: '@tourTemplate'
         class: '@activeClass'
-      controller: ['$scope', 'tourist', ($scope, tourist) ->
+      controller: ['$scope', ($scope) ->
         # JQLite doesnt support offset, so we implement it here
         _boundingOffset = (element) ->
           return unless element?
@@ -37,11 +37,22 @@ angular.module 'angular.tourist'
           $scope.$data = step.data
           $scope.$content = $interpolate(step.content)($scope)
 
-        @hide = () =>
+        @hide = () ->
           $scope.$show = false
+
+        @setTour = ($tour) ->
+          $scope.$next = () -> $tour.next()
+          $scope.$previous = () -> $tour.previous()
+          $scope.$hasNext = () -> $tour.hasNext()
+          $scope.$hasPrevious = () -> $tour.hasPrevious()
+          $scope.$end = () -> $tour.end()
+          $scope.$isLastStep = () -> $tour.isLastStep()
+
+        return
       ]
       link: (scope, element, attrs, ctrl) ->
-        tourist.registerTemplate(scope.templateName, ctrl)
-        scope.tourist = tourist
+        $tourist.registerTemplate(scope.templateName, ctrl)
+        return
     ]
+
 
