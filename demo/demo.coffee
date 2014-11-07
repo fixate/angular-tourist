@@ -1,8 +1,8 @@
 angular.module 'angular.tourist.demo', [
   'angular.tourist'
 ]
-  .config ['touristProvider', ($tour) ->
-    $tour.define
+  .config ['$touristProvider', ($tour) ->
+    $tour.define 'main',
       autostart: false
       stepDefault:
         activeClass: 'highlight'
@@ -44,17 +44,18 @@ angular.module 'angular.tourist.demo', [
       ]
   ]
 
-  .controller 'DemoCtrl', ['$scope', 'tourist', ($scope, tourist) ->
+  .controller 'DemoCtrl', ['$scope', '$tourist', ($scope, $tourist) ->
+    tour = $tourist.get('main')
     $scope.startTour = ->
-      tourist.start()
+      tour.start()
 
     $scope.endTour = ->
-      tourist.end()
+      tour.end()
 
-    tourist.on 'started', ->
+    tour.on 'started', ->
       $scope.tourStarted = true
 
-    tourist.on 'complete', ->
+    tour.on 'complete', ->
       $scope.tourStarted = false
   ]
 

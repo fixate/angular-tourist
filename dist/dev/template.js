@@ -1,5 +1,5 @@
 angular.module('angular.tourist').directive('tourTemplate', [
-  'tourist', '$window', '$templateCache', '$interpolate', function(tourist, $window, $templateCache, $interpolate) {
+  '$tourist', '$window', '$templateCache', '$interpolate', function($tourist, $window, $templateCache, $interpolate) {
     $templateCache.put('angular/tourist.html', '<div ng-class="styles" ng-if="$show" ng-class="class"> </div>');
     return {
       restrict: 'EA',
@@ -11,7 +11,7 @@ angular.module('angular.tourist').directive('tourTemplate', [
         "class": '@activeClass'
       },
       controller: [
-        '$scope', 'tourist', function($scope, tourist) {
+        '$scope', function($scope) {
           var _boundingOffset;
           _boundingOffset = function(element) {
             var box, doc, documentElem;
@@ -39,16 +39,33 @@ angular.module('angular.tourist').directive('tourTemplate', [
             $scope.$data = step.data;
             return $scope.$content = $interpolate(step.content)($scope);
           };
-          return this.hide = (function(_this) {
-            return function() {
-              return $scope.$show = false;
+          this.hide = function() {
+            return $scope.$show = false;
+          };
+          this.setTour = function($tour) {
+            $scope.$next = function() {
+              return $tour.next();
             };
-          })(this);
+            $scope.$previous = function() {
+              return $tour.previous();
+            };
+            $scope.$hasNext = function() {
+              return $tour.hasNext();
+            };
+            $scope.$hasPrevious = function() {
+              return $tour.hasPrevious();
+            };
+            $scope.$end = function() {
+              return $tour.end();
+            };
+            return $scope.$isLastStep = function() {
+              return $tour.isLastStep();
+            };
+          };
         }
       ],
       link: function(scope, element, attrs, ctrl) {
-        tourist.registerTemplate(scope.templateName, ctrl);
-        return scope.tourist = tourist;
+        $tourist.registerTemplate(scope.templateName, ctrl);
       }
     };
   }
