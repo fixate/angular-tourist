@@ -1,13 +1,11 @@
 angular.module 'angular.tourist'
 
   .directive 'tourTemplate', [
-    '$tourist', '$window', '$templateCache', '$interpolate',
-    ($tourist, $window, $templateCache, $interpolate) ->
+    '$tourist', '$templateCache', '$interpolate',
+    ($tourist, $templateCache, $interpolate) ->
 
-      $templateCache.put 'angular/tourist.html', '
-      <div ng-class="styles" ng-if="$show" ng-class="class">
-
-      </div>'
+      $templateCache.put 'angular/tourist.html',
+        '<div ng-class="styles" ng-if="$show" ng-class="class">No template</div>'
 
       restrict: 'EA'
       templateUrl: (element, attrs) -> attrs.src || 'angular/tourist.html'
@@ -15,25 +13,9 @@ angular.module 'angular.tourist'
         templateName: '@tourTemplate'
         class: '@activeClass'
       controller: ['$scope', ($scope) ->
-        # JQLite doesnt support offset, so we implement it here
-        _boundingOffset = (element) ->
-          return unless element?
-          doc = element.ownerDocument
-          documentElem = doc.documentElement
-          box = element.getBoundingClientRect?()
-
-          return unless box?
-
-          {
-            top: box.top + ($window.pageYOffset || documentElem.scrollTop) - (documentElem.clientTop || 0),
-            left: box.left + ($window.pageXOffset || documentElem.scrollLeft) - (documentElem.clientLeft || 0),
-            width: element.offsetWidth,
-            height: element.offsetHeight
-          }
-
-        @show = (element, step) ->
+        @show = (ctrl, step) ->
           $scope.$show = true
-          $scope.$pos = angular.extend(_boundingOffset(element[0]), {position: 'absolute'})
+          $scope.$pos = angular.extend(ctrl.offset(), position: 'absolute')
           $scope.$data = step.data
           $scope.$content = $interpolate(step.content)($scope)
 

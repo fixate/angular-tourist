@@ -53,15 +53,29 @@
     </div>
     <div class="large-4 columns"></div>
   </div>
+  <div class="row">
+    <div class="large-12 columns">
+      <p>
+        Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+      </p>
+      <p>
+        Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+      </p>
+      <p>
+        Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsumLorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+      </p>
+      <img src="http://lorempixel.com/300/400/" tour-step="another-image" />
+    </div>
+  </div>
   <script id="angular/tour.html" type="text/ng-template">
-    <div class="tour_-highlight" ng-if="$show" ng-style="$pos" position-my="$data.position" reposition="$content" ui-tooltip="">
+    <div class="tour_-highlight" ng-if="$show" ng-style="$pos" position-at="$data.positionAt" position-my="$data.positionMy" reposition="$content" ui-tooltip="">
       <h4 ng-if="$data.title" style="color: red">
         {{ $data.title }}
       </h4>
       <p>
         {{ $content }}
       </p>
-      <button ng-click="$previous()" ng-if="$hasPrevious()">Prev</button><button ng-click="$next()" ng-if="$hasNext()">Next</button><button ng-click="$end()" ng-if="$isLastStep()">End tour</button><small class="right">{{ $data.position }}</small>
+      <button ng-click="$previous()" ng-if="$hasPrevious()">Prev</button><button ng-click="$next()" ng-if="$hasNext()">Next</button><button ng-click="$end()" ng-if="$isLastStep()">End tour</button><small class="right">{{ $data.positionMy }}</small>
     </div>
   </script>
   <div src="angular/tour.html" tour-template=""></div>

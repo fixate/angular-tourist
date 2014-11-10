@@ -86,37 +86,40 @@ class Tour
   showStep: () =>
     template = @getTemplate()
     template.setTour(@)
-    template.show(@getElement(), @activeStep)
+    ctrl = @getController()
+    template.show(ctrl, @activeStep)
+    ctrl.activate(@activeStep)
 
   enter: () =>
-    el = @getElement()
+    el = @getController().element
     if @activeStep.activeClass?
       el.addClass(@activeStep.activeClass)
 
   leave: () =>
-    el = @getElement()
+    el = @getController().element
     if @activeStep.activeClass?
       el.removeClass(@activeStep.activeClass)
 
   getTemplate: () =>
     Tour.templates[@activeStep.template || 'default']
 
-  getElement: (step = @activeStep) =>
-    Tour.elements[step.for]
+  getController: (step = @activeStep) =>
+    Tour.controllers[step.for]
 
   setSteps: (steps) =>
     @steps = []
     defaults = @options.stepDefault || {}
     for step in steps
-      newStep = angular.extend({}, defaults || {}, step, @getElementStepData(step))
+      newStep = angular.extend({}, defaults || {}, step, @getControllerStepData(step))
       if defaults.data?
         newStep.data = angular.extend({}, defaults.data, step.data)
       @steps.push(newStep)
     return
 
-  getElementStepData: (step) =>
-    el = @getElement(step)
-    return {} unless el?
+  getControllerStepData: (step) =>
+    ctrl = @getController(step)
+    return {} unless ctrl?
+    el = ctrl.element
     scope = el.scope()
     stepData = {}
     $parse = Tour.$parse
@@ -136,14 +139,13 @@ class Tour
     @steps[@index]
 
   stepScope: (step) =>
-    angular.element(@getElement(step)).scope()
-
+    angular.element(@getController(step).element).scope()
 
 angular.module 'angular.tourist'
 
   .provider '$tourist', ->
     _tourOpts = {}
-    _stepElements = {}
+    _stepCtrls = {}
     _templates = {}
 
     @define = (name, options) ->
@@ -161,18 +163,18 @@ angular.module 'angular.tourist'
       Tour.$rootScope = $rootScope
       Tour.$parse = $parse
       Tour.$injector = $injector
-      Tour.elements = _stepElements
+      Tour.controllers = _stepCtrls
       Tour.templates = _templates
 
       {
         get: (name = 'default') ->
           throw "You have not defined a tour configuration for #{name}!" unless _tourOpts[name]?
           throw "You have not defined any templates for the tour!" if _templates.length == 0
-          throw "You have not defined any steps for the tour!" if _stepElements.length == 0
+          throw "You have not defined any steps for the tour!" if _stepCtrls.length == 0
           _tours[name] ||= new Tour(name, _tourOpts[name])
 
-        registerStep: (name, element) ->
-          _stepElements[name] = element
+        registerStep: (name, ctrl) ->
+          _stepCtrls[name] = ctrl
 
         registerTemplate: (name, ctrl) ->
           if typeof name == 'object'

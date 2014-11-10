@@ -1,6 +1,6 @@
 angular.module('angular.tourist').directive('tourTemplate', [
-  '$tourist', '$window', '$templateCache', '$interpolate', function($tourist, $window, $templateCache, $interpolate) {
-    $templateCache.put('angular/tourist.html', '<div ng-class="styles" ng-if="$show" ng-class="class"> </div>');
+  '$tourist', '$templateCache', '$interpolate', function($tourist, $templateCache, $interpolate) {
+    $templateCache.put('angular/tourist.html', '<div ng-class="styles" ng-if="$show" ng-class="class">No template</div>');
     return {
       restrict: 'EA',
       templateUrl: function(element, attrs) {
@@ -12,28 +12,9 @@ angular.module('angular.tourist').directive('tourTemplate', [
       },
       controller: [
         '$scope', function($scope) {
-          var _boundingOffset;
-          _boundingOffset = function(element) {
-            var box, doc, documentElem;
-            if (element == null) {
-              return;
-            }
-            doc = element.ownerDocument;
-            documentElem = doc.documentElement;
-            box = typeof element.getBoundingClientRect === "function" ? element.getBoundingClientRect() : void 0;
-            if (box == null) {
-              return;
-            }
-            return {
-              top: box.top + ($window.pageYOffset || documentElem.scrollTop) - (documentElem.clientTop || 0),
-              left: box.left + ($window.pageXOffset || documentElem.scrollLeft) - (documentElem.clientLeft || 0),
-              width: element.offsetWidth,
-              height: element.offsetHeight
-            };
-          };
-          this.show = function(element, step) {
+          this.show = function(ctrl, step) {
             $scope.$show = true;
-            $scope.$pos = angular.extend(_boundingOffset(element[0]), {
+            $scope.$pos = angular.extend(ctrl.offset(), {
               position: 'absolute'
             });
             $scope.$data = step.data;
