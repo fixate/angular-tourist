@@ -7,7 +7,8 @@ angular.module 'angular.tourist.demo', [
       stepDefault:
         activeClass: 'highlight'
         data:
-          position: "top left"
+          positionMy: "top left"
+          positionAt: "left center"
       enter: ['$step', ($step) ->
         console.log("[enter] step #{$step.for}")
       ]
@@ -29,21 +30,33 @@ angular.module 'angular.tourist.demo', [
           data:
             name: 'Sidenav'
             title: 'Step 1'
+            positionAt: "right center"
         }
         {
           for: 'exitNav'
           content: 'Exit the site?!'
           data:
-            position: "bottom left"
+            positionMy: "bottom left"
+            positionAt: "right center"
         }
         {
           for: 'image'
           content: 'This image is random'
           data:
-            position: "center right"
+            positionMy: "center right"
+            positionAt: "right center"
         }
         {
           for: 'paragraph'
+          data:
+            positionAt: "bottom center"
+        }
+        {
+          for: 'another-image'
+          content: 'Another image which we have to auto scroll to.'
+          data:
+            positionMy: 'left center'
+            positionAt: "right center"
         }
       ]
   ]
@@ -76,6 +89,7 @@ angular.module 'angular.tourist.demo', [
       onRender: '&'
       reposition: '='
       positionMy: '='
+      positionAt: '='
     link: (scope, element, attrs, ctrl, $transclude) ->
       options = scope.$eval(attrs.uiTooltip) || {}
       $ = angular.element
@@ -89,7 +103,6 @@ angular.module 'angular.tourist.demo', [
             event: false
           show:
             event: 'click'
-          position: scope.position
           events:
             render: (event, api) ->
               scope.onRender(event: event, api: api)
@@ -118,6 +131,10 @@ angular.module 'angular.tourist.demo', [
       scope.$watch 'positionMy', (position) ->
         return unless position?
         api.set('position.my', position)
+
+      scope.$watch 'positionAt', (position) ->
+        return unless position?
+        api.set('position.at', position)
 
       scope.$watch 'reposition', ->
         api.reposition()

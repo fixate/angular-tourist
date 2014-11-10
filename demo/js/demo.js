@@ -5,7 +5,8 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
       stepDefault: {
         activeClass: 'highlight',
         data: {
-          position: "top left"
+          positionMy: "top left",
+          positionAt: "left center"
         }
       },
       enter: [
@@ -34,22 +35,35 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
           ],
           data: {
             name: 'Sidenav',
-            title: 'Step 1'
+            title: 'Step 1',
+            positionAt: "right center"
           }
         }, {
           "for": 'exitNav',
           content: 'Exit the site?!',
           data: {
-            position: "bottom left"
+            positionMy: "bottom left",
+            positionAt: "right center"
           }
         }, {
           "for": 'image',
           content: 'This image is random',
           data: {
-            position: "center right"
+            positionMy: "center right",
+            positionAt: "right center"
           }
         }, {
-          "for": 'paragraph'
+          "for": 'paragraph',
+          data: {
+            positionAt: "bottom center"
+          }
+        }, {
+          "for": 'another-image',
+          content: 'Another image which we have to auto scroll to.',
+          data: {
+            positionMy: 'left center',
+            positionAt: "right center"
+          }
         }
       ]
     });
@@ -87,7 +101,8 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
         content: '@',
         onRender: '&',
         reposition: '=',
-        positionMy: '='
+        positionMy: '=',
+        positionAt: '='
       },
       link: function(scope, element, attrs, ctrl, $transclude) {
         var api, compiler, el, options, qtip;
@@ -105,7 +120,6 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
             show: {
               event: 'click'
             },
-            position: scope.position,
             events: {
               render: function(event, api) {
                 scope.onRender({
@@ -138,6 +152,12 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
             return;
           }
           return api.set('position.my', position);
+        });
+        scope.$watch('positionAt', function(position) {
+          if (position == null) {
+            return;
+          }
+          return api.set('position.at', position);
         });
         scope.$watch('reposition', function() {
           return api.reposition();

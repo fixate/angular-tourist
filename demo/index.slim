@@ -42,8 +42,33 @@ body ng-controller="DemoCtrl"
         | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
     .large-4.columns
 
+
+  .row
+    .large-12.columns
+      p
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+      p
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+      p
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+        | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
+      img src="http://lorempixel.com/300/400/" tour-step="another-image"
+
   script id="angular/tour.html" type="text/ng-template"
-    div ng-style="$pos" ng-if="$show" class="tour_-highlight" ui-tooltip="" reposition="$content" position-my="$data.position"
+    div[
+      ng-style="$pos"
+      ng-if="$show"
+      class="tour_-highlight"
+      ui-tooltip=""
+      reposition="$content"
+      position-my="$data.positionMy"
+      position-at="$data.positionAt"
+    ]
       h4 ng-if="$data.title" style="color: red"
         | {{ $data.title }}
       p
@@ -52,7 +77,7 @@ body ng-controller="DemoCtrl"
       button ng-if="$hasNext()" ng-click="$next()" Next
       button ng-if="$isLastStep()" ng-click="$end()" End tour
       small.right
-        | {{ $data.position }}
+        | {{ $data.positionMy }}
 
   div tour-template="" src="angular/tour.html"
 

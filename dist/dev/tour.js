@@ -11,9 +11,9 @@ Tour = (function() {
     this.name = name;
     this.stepScope = __bind(this.stepScope, this);
     this.getStep = __bind(this.getStep, this);
-    this.getElementStepData = __bind(this.getElementStepData, this);
+    this.getControllerStepData = __bind(this.getControllerStepData, this);
     this.setSteps = __bind(this.setSteps, this);
-    this.getElement = __bind(this.getElement, this);
+    this.getController = __bind(this.getController, this);
     this.getTemplate = __bind(this.getTemplate, this);
     this.leave = __bind(this.leave, this);
     this.enter = __bind(this.enter, this);
@@ -153,15 +153,17 @@ Tour = (function() {
   };
 
   Tour.prototype.showStep = function() {
-    var template;
+    var ctrl, template;
     template = this.getTemplate();
     template.setTour(this);
-    return template.show(this.getElement(), this.activeStep);
+    ctrl = this.getController();
+    template.show(ctrl, this.activeStep);
+    return ctrl.activate(this.activeStep);
   };
 
   Tour.prototype.enter = function() {
     var el;
-    el = this.getElement();
+    el = this.getController().element;
     if (this.activeStep.activeClass != null) {
       return el.addClass(this.activeStep.activeClass);
     }
@@ -169,7 +171,7 @@ Tour = (function() {
 
   Tour.prototype.leave = function() {
     var el;
-    el = this.getElement();
+    el = this.getController().element;
     if (this.activeStep.activeClass != null) {
       return el.removeClass(this.activeStep.activeClass);
     }
@@ -179,11 +181,11 @@ Tour = (function() {
     return Tour.templates[this.activeStep.template || 'default'];
   };
 
-  Tour.prototype.getElement = function(step) {
+  Tour.prototype.getController = function(step) {
     if (step == null) {
       step = this.activeStep;
     }
-    return Tour.elements[step["for"]];
+    return Tour.controllers[step["for"]];
   };
 
   Tour.prototype.setSteps = function(steps) {
@@ -192,7 +194,7 @@ Tour = (function() {
     defaults = this.options.stepDefault || {};
     for (_i = 0, _len = steps.length; _i < _len; _i++) {
       step = steps[_i];
-      newStep = angular.extend({}, defaults || {}, step, this.getElementStepData(step));
+      newStep = angular.extend({}, defaults || {}, step, this.getControllerStepData(step));
       if (defaults.data != null) {
         newStep.data = angular.extend({}, defaults.data, step.data);
       }
@@ -200,12 +202,13 @@ Tour = (function() {
     }
   };
 
-  Tour.prototype.getElementStepData = function(step) {
-    var $parse, el, scope, stepData;
-    el = this.getElement(step);
-    if (el == null) {
+  Tour.prototype.getControllerStepData = function(step) {
+    var $parse, ctrl, el, scope, stepData;
+    ctrl = this.getController(step);
+    if (ctrl == null) {
       return {};
     }
+    el = ctrl.element;
     scope = el.scope();
     stepData = {};
     $parse = Tour.$parse;
@@ -232,7 +235,7 @@ Tour = (function() {
   };
 
   Tour.prototype.stepScope = function(step) {
-    return angular.element(this.getElement(step)).scope();
+    return angular.element(this.getController(step).element).scope();
   };
 
   return Tour;
@@ -240,9 +243,9 @@ Tour = (function() {
 })();
 
 angular.module('angular.tourist').provider('$tourist', function() {
-  var _stepElements, _templates, _tourOpts;
+  var _stepCtrls, _templates, _tourOpts;
   _tourOpts = {};
-  _stepElements = {};
+  _stepCtrls = {};
   _templates = {};
   this.define = function(name, options) {
     if (typeof name === 'object') {
@@ -258,7 +261,7 @@ angular.module('angular.tourist').provider('$tourist', function() {
       Tour.$rootScope = $rootScope;
       Tour.$parse = $parse;
       Tour.$injector = $injector;
-      Tour.elements = _stepElements;
+      Tour.controllers = _stepCtrls;
       Tour.templates = _templates;
       return {
         get: function(name) {
@@ -271,13 +274,13 @@ angular.module('angular.tourist').provider('$tourist', function() {
           if (_templates.length === 0) {
             throw "You have not defined any templates for the tour!";
           }
-          if (_stepElements.length === 0) {
+          if (_stepCtrls.length === 0) {
             throw "You have not defined any steps for the tour!";
           }
           return _tours[name] || (_tours[name] = new Tour(name, _tourOpts[name]));
         },
-        registerStep: function(name, element) {
-          return _stepElements[name] = element;
+        registerStep: function(name, ctrl) {
+          return _stepCtrls[name] = ctrl;
         },
         registerTemplate: function(name, ctrl) {
           if (typeof name === 'object') {
