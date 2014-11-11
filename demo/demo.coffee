@@ -6,6 +6,7 @@ angular.module 'angular.tourist.demo', [
       autostart: false
       stepDefault:
         activeClass: 'highlight'
+        zIndex: 2000
         data:
           positionMy: "top left"
           positionAt: "left center"
