@@ -27,18 +27,18 @@ body ng-controller="DemoCtrl"
       li
         a href="#step3"  Step 3
       li.divider
-      li tour-step="exitNav"
+      li tour-step="exitNav" tour-data="{positionMy: 'bottom left', positionAt: 'right center'}"
         a href="#exit"  Exit
   .row
     .large-4.columns tour-step="image"
-      img src="http://lorempixel.com/300/400/" /
+      img src="http://lorempixel.com/300/400/"
     .large-4.columns(
       tour-step="paragraph"
       tour-content="News flash!"
       tour-enter="animate=true"
       tour-leave="animate=false"
     )
-      p ng-class="{'animate-paragraph': animate}"
+      p
         | Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum
     .large-4.columns
 

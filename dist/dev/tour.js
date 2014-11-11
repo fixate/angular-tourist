@@ -99,44 +99,71 @@ Tour = (function() {
   };
 
   Tour.prototype.activate = function() {
+    var promise, _continue;
+    promise = null;
     if (this.lastStep != null) {
-      this.emit('leave', this.lastStep);
+      promise = this.emit('leave', this.lastStep);
     }
-    this.emit('enter', this.activeStep);
-    return this.showStep();
+    _continue = (function(_this) {
+      return function() {
+        return _this.emit('enter', _this.activeStep).then(function() {
+          return _this.showStep();
+        });
+      };
+    })(this);
+    if (promise != null) {
+      return promise.then(_continue);
+    } else {
+      return _continue();
+    }
   };
 
   Tour.prototype.on = function(event, handler) {
     var _this;
     _this = this;
-    return Tour.$rootScope.$on("$$tour-" + this.name + "-" + event, function(_, $scope, $step) {
+    return Tour.$rootScope.$on("$$tour-" + this.name + "-" + event, function($event, $scope, $step) {
       return Tour.$injector.invoke(handler, _this, {
         $scope: $scope,
-        $step: $step
+        $step: $step,
+        $event: $event
       });
     });
   };
 
   Tour.prototype.emit = function(event, step) {
-    var $scope, fn;
+    var $scope, fn, fns, promises, q, ret, rets, _i, _j, _len, _len1;
     if (step == null) {
       step = null;
     }
     $scope = null;
+    rets = [];
     if (step) {
       $scope = this.stepScope(step);
-      if (fn = step[event]) {
-        if (fn.$$tourParsed != null) {
-          fn($scope);
-        } else {
-          Tour.$injector.invoke(fn, this, {
+      if (fns = step[event]) {
+        for (_i = 0, _len = fns.length; _i < _len; _i++) {
+          fn = fns[_i];
+          ret = fn.$$tourParsed != null ? fn($scope) : Tour.$injector.invoke(fn, this, {
             $scope: $scope,
-            $step: step
+            $step: step,
+            $element: this.getController(step).element
           });
+          rets.push(ret);
         }
       }
     }
-    return Tour.$rootScope.$emit("$$tour-" + this.name + "-" + event, $scope, step);
+    Tour.$rootScope.$emit("$$tour-" + this.name + "-" + event, $scope, step);
+    promises = [];
+    for (_j = 0, _len1 = rets.length; _j < _len1; _j++) {
+      ret = rets[_j];
+      if ((ret != null) && (ret.then != null)) {
+        promises.push(ret);
+      } else {
+        q = Tour.$q.defer();
+        q.resolve(ret);
+        promises.push(q.promise);
+      }
+    }
+    return Tour.$q.all(promises);
   };
 
   Tour.prototype.setActiveStep = function(index) {
@@ -197,14 +224,28 @@ Tour = (function() {
   };
 
   Tour.prototype.setSteps = function(steps) {
-    var defaults, newStep, step, _i, _len;
+    var defaults, elemData, newStep, step, _i, _len;
     this.steps = [];
     defaults = this.options.stepDefault || {};
     for (_i = 0, _len = steps.length; _i < _len; _i++) {
       step = steps[_i];
-      newStep = angular.extend({}, defaults || {}, step, this.getControllerStepData(step));
+      elemData = this.getControllerStepData(step);
+      newStep = angular.extend({}, defaults, step);
+      angular.forEach(Tour.EVT_PROPS, function(evt) {
+        var fn;
+        fn = newStep[evt];
+        newStep[evt] = [];
+        if (fn != null) {
+          newStep[evt].push(fn);
+        }
+        if (elemData[evt] != null) {
+          newStep[evt].push(elemData[evt]);
+        }
+        return delete elemData[evt];
+      });
+      angular.extend(newStep, elemData);
       if (defaults.data != null) {
-        newStep.data = angular.extend({}, defaults.data, step.data);
+        newStep.data = angular.extend({}, defaults.data, step.data, elemData.data);
       }
       this.steps.push(newStep);
     }
@@ -266,7 +307,7 @@ angular.module('angular.tourist').provider('$tourist', function() {
     _tourOpts[name] = options;
   };
   this.$get = [
-    '$rootScope', '$parse', '$injector', function($rootScope, $parse, $injector) {
+    '$rootScope', '$parse', '$injector', '$q', function($rootScope, $parse, $injector, $q) {
       var _tours;
       _tours = {};
       Tour.$rootScope = $rootScope;
@@ -274,6 +315,7 @@ angular.module('angular.tourist').provider('$tourist', function() {
       Tour.$injector = $injector;
       Tour.controllers = _stepCtrls;
       Tour.templates = _templates;
+      Tour.$q = $q;
       return {
         get: function(name) {
           if (name == null) {
