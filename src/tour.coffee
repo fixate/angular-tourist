@@ -96,7 +96,7 @@ class Tour
       el.addClass(@activeStep.activeClass)
 
   leave: () =>
-    el = @getController().element
+    el = @getController(@lastStep).element
     if @activeStep.activeClass?
       el.removeClass(@activeStep.activeClass)
 
