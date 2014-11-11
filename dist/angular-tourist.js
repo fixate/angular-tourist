@@ -220,7 +220,7 @@ Tour = (function() {
       };
     })(this);
     if (promise != null) {
-      return promise.then(_continue());
+      return promise.then(_continue);
     } else {
       return _continue();
     }
