@@ -36,9 +36,6 @@ angular.module 'angular.tourist.demo', [
         {
           for: 'exitNav'
           content: 'Exit the site?!'
-          data:
-            positionMy: "bottom left"
-            positionAt: "right center"
         }
         {
           for: 'image'
@@ -51,6 +48,14 @@ angular.module 'angular.tourist.demo', [
           for: 'paragraph'
           data:
             positionAt: "bottom center"
+          enter: ['$animate', '$element', ($animate, $element) ->
+            $animate.addClass($element, 'animate-paragraph').then ->
+              console.log('finished')
+          ]
+
+          leave: ['$animate', '$element', ($animate, $element) ->
+            $animate.removeClass($element, 'animate-paragraph')
+          ]
         }
         {
           for: 'another-image'
@@ -62,7 +67,7 @@ angular.module 'angular.tourist.demo', [
       ]
   ]
 
-  .controller 'DemoCtrl', ['$scope', '$tourist', ($scope, $tourist) ->
+  .controller 'DemoCtrl', ['$scope', '$tourist', '$timeout', ($scope, $tourist, $timeout) ->
     tour = $tourist.get('main')
     $scope.startTour = ->
       tour.start()

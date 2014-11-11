@@ -41,11 +41,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
           }
         }, {
           "for": 'exitNav',
-          content: 'Exit the site?!',
-          data: {
-            positionMy: "bottom left",
-            positionAt: "right center"
-          }
+          content: 'Exit the site?!'
         }, {
           "for": 'image',
           content: 'This image is random',
@@ -57,7 +53,19 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
           "for": 'paragraph',
           data: {
             positionAt: "bottom center"
-          }
+          },
+          enter: [
+            '$animate', '$element', function($animate, $element) {
+              return $animate.addClass($element, 'animate-paragraph').then(function() {
+                return console.log('finished');
+              });
+            }
+          ],
+          leave: [
+            '$animate', '$element', function($animate, $element) {
+              return $animate.removeClass($element, 'animate-paragraph');
+            }
+          ]
         }, {
           "for": 'another-image',
           content: 'Another image which we have to auto scroll to.',
@@ -70,7 +78,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
     });
   }
 ]).controller('DemoCtrl', [
-  '$scope', '$tourist', function($scope, $tourist) {
+  '$scope', '$tourist', '$timeout', function($scope, $tourist, $timeout) {
     var tour;
     tour = $tourist.get('main');
     $scope.startTour = function() {

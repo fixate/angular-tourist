@@ -52,27 +52,53 @@ class Tour
       @activate()
 
   activate: () =>
-    @emit('leave', @lastStep) if @lastStep?
-    @emit('enter', @activeStep)
-    @showStep()
+    promise = null
+    promise = @emit('leave', @lastStep) if @lastStep?
+
+    _continue = =>
+      @emit('enter', @activeStep).then =>
+        @showStep()
+
+    if promise?
+      promise.then(_continue)
+    else
+      _continue()
 
   on: (event, handler) =>
     _this = @
-    Tour.$rootScope.$on "$$tour-#{@name}-#{event}", (_, $scope, $step) ->
-      Tour.$injector.invoke(handler, _this, $scope: $scope, $step: $step)
+    Tour.$rootScope.$on "$$tour-#{@name}-#{event}", ($event, $scope, $step) ->
+      Tour.$injector.invoke(handler, _this, $scope: $scope, $step: $step, $event: $event)
 
   emit: (event, step = null) =>
     $scope = null
+    rets = []
     if step
       $scope = @stepScope(step)
-      if fn = step[event]
-        # HACK: This to detect an inline function which cannot be invoked
-        # with the injector
-        if fn.$$tourParsed?
-          fn($scope)
-        else
-          Tour.$injector.invoke(fn, @, $scope: $scope, $step: step)
+      if fns = step[event]
+        for fn in fns
+          # HACK: This to detect an inline function which cannot be invoked
+          # with the injector
+          ret = if fn.$$tourParsed?
+            fn($scope)
+          else
+            Tour.$injector.invoke fn, @,
+              $scope: $scope
+              $step: step
+              $element: @getController(step).element
+
+          rets.push(ret)
+
     Tour.$rootScope.$emit("$$tour-#{@name}-#{event}", $scope, step)
+
+    promises = []
+    for ret in rets
+      if ret? && ret.then?
+        promises.push(ret)
+      else
+        q = Tour.$q.defer()
+        q.resolve(ret)
+        promises.push(q.promise)
+    Tour.$q.all(promises)
 
   setActiveStep: (index) =>
     if index >= @steps.length
@@ -117,9 +143,21 @@ class Tour
     @steps = []
     defaults = @options.stepDefault || {}
     for step in steps
-      newStep = angular.extend({}, defaults || {}, step, @getControllerStepData(step))
+      elemData = @getControllerStepData(step)
+      newStep = angular.extend({}, defaults, step)
+      # Store events callbacks from config and element
+      angular.forEach Tour.EVT_PROPS, (evt) ->
+        fn = newStep[evt]
+        newStep[evt] = []
+        newStep[evt].push(fn) if fn?
+        newStep[evt].push(elemData[evt]) if elemData[evt]?
+        delete elemData[evt]
+
+      angular.extend(newStep, elemData)
+
+      # Extend data
       if defaults.data?
-        newStep.data = angular.extend({}, defaults.data, step.data)
+        newStep.data = angular.extend({}, defaults.data, step.data, elemData.data)
       @steps.push(newStep)
     return
 
@@ -163,7 +201,7 @@ angular.module 'angular.tourist'
       _tourOpts[name] = options
       return
 
-    @.$get = ['$rootScope', '$parse', '$injector', ($rootScope, $parse, $injector) ->
+    @.$get = ['$rootScope', '$parse', '$injector', '$q', ($rootScope, $parse, $injector, $q) ->
       _tours = {}
 
       # Tour dependencies
@@ -172,6 +210,7 @@ angular.module 'angular.tourist'
       Tour.$injector = $injector
       Tour.controllers = _stepCtrls
       Tour.templates = _templates
+      Tour.$q = $q
 
       {
         get: (name = 'default') ->
