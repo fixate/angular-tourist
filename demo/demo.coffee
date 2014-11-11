@@ -35,9 +35,6 @@ angular.module 'angular.tourist.demo', [
         {
           for: 'exitNav'
           content: 'Exit the site?!'
-          data:
-            positionMy: "bottom left"
-            positionAt: "right center"
         }
         {
           for: 'image'

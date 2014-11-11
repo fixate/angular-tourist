@@ -150,7 +150,7 @@ class Tour
 
       # Extend data
       if defaults.data?
-        newStep.data = angular.extend({}, defaults.data, step.data)
+        newStep.data = angular.extend({}, defaults.data, step.data, elemData.data)
       @steps.push(newStep)
     return
 
