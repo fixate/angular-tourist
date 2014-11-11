@@ -95,10 +95,17 @@ class Tour
     if @activeStep.activeClass?
       el.addClass(@activeStep.activeClass)
 
+    if el.css('position') == 'static'
+      el.css('position', 'relative')
+
+    el.css('z-index', @activeStep.zIndex + 1 || 1001 )
+
   leave: () =>
-    el = @getController().element
+    el = @getController(@lastStep).element
     if @activeStep.activeClass?
       el.removeClass(@activeStep.activeClass)
+
+    el.css({'z-index': '', 'position': ''})
 
   getTemplate: () =>
     Tour.templates[@activeStep.template || 'default']
@@ -135,7 +142,7 @@ class Tour
 
     stepData
 
-  getStep: () =>
+  getStep: (index = @index) =>
     @steps[@index]
 
   stepScope: (step) =>

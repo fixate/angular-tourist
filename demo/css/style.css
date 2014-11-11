@@ -1,6 +1,25 @@
 .tour_-highlight {
-  outline: 100em solid hsla(0, 0%, 0%, .2);
-  outline-style: outset;
+	background-color: #FFF;
+}
+
+.tour_-highlight:before {
+	position: fixed;
+	content: '';
+	background-color: hsla(0, 0%, 0%, .3);
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+}
+
+.tour_-highlight:after {
+	position: absolute;
+	content: '';
+	background-color: hsla(0, 0%, 100%, .95);
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
 }
 
 .animate-paragraph {
@@ -12,3 +31,4 @@
 .nav-border {
   border: 2px dashed #75ef87;
 }
+
