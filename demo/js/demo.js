@@ -40,11 +40,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
           }
         }, {
           "for": 'exitNav',
-          content: 'Exit the site?!',
-          data: {
-            positionMy: "bottom left",
-            positionAt: "right center"
-          }
+          content: 'Exit the site?!'
         }, {
           "for": 'image',
           content: 'This image is random',

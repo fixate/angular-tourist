@@ -352,7 +352,7 @@ Tour = (function() {
       });
       angular.extend(newStep, elemData);
       if (defaults.data != null) {
-        newStep.data = angular.extend({}, defaults.data, step.data);
+        newStep.data = angular.extend({}, defaults.data, step.data, elemData.data);
       }
       this.steps.push(newStep);
     }
