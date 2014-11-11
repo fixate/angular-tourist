@@ -60,7 +60,7 @@ class Tour
         @showStep()
 
     if promise?
-      promise.then(_continue())
+      promise.then(_continue)
     else
       _continue()
 
