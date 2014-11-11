@@ -1,6 +1,6 @@
 angular.module 'angular.tourist'
 
-  .directive 'tourStep', ['$tourist', '$window', ($tourist, $window) ->
+  .directive 'tourStep', ['$tourist', '$window', '$injector', ($tourist, $window, $injector) ->
     restrict: 'EAC'
     controller: ['$scope', ($scope) ->
       @element = null
@@ -23,11 +23,16 @@ angular.module 'angular.tourist'
 
       @activate = (step) =>
         offset = @offset()
-        scrollLeft = offset.left + offset.width / 2 - $window.innerWidth / 2
-        scrollTop = offset.top + offset.height / 2 - $window.innerHeight / 2
+        scroll = {
+          left: offset.left + offset.width / 2 - $window.innerWidth / 2
+          top: offset.top + offset.height / 2 - $window.innerHeight / 2
+        }
 
-        if !step.activated? || step.activated.apply(@, [scrollTop, scrollLeft, offset]) != false
-          $window.scrollTo(scrollLeft, scrollTop)
+        step.activated ||= ['scroll', (scroll) ->
+          $window.scrollTo(scroll.left, scroll.top)
+        ]
+
+        $injector.invoke(step.activated, @, scroll: scroll)
 
       @offset = () =>
         _boundingOffset(@element[0])
