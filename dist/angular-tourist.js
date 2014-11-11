@@ -1,7 +1,7 @@
 angular.module('angular.tourist', []);
 
 angular.module('angular.tourist').directive('tourStep', [
-  '$tourist', '$window', function($tourist, $window) {
+  '$tourist', '$window', '$injector', function($tourist, $window, $injector) {
     return {
       restrict: 'EAC',
       controller: [
@@ -28,13 +28,20 @@ angular.module('angular.tourist').directive('tourStep', [
           };
           this.activate = (function(_this) {
             return function(step) {
-              var offset, scrollLeft, scrollTop;
+              var offset, scroll;
               offset = _this.offset();
-              scrollLeft = offset.left + offset.width / 2 - $window.innerWidth / 2;
-              scrollTop = offset.top + offset.height / 2 - $window.innerHeight / 2;
-              if ((step.activated == null) || step.activated.apply(_this, [scrollTop, scrollLeft, offset]) !== false) {
-                return $window.scrollTo(scrollLeft, scrollTop);
-              }
+              scroll = {
+                left: offset.left + offset.width / 2 - $window.innerWidth / 2,
+                top: offset.top + offset.height / 2 - $window.innerHeight / 2
+              };
+              step.activated || (step.activated = [
+                'scroll', function(scroll) {
+                  return $window.scrollTo(scroll.left, scroll.top);
+                }
+              ]);
+              return $injector.invoke(step.activated, _this, {
+                scroll: scroll
+              });
             };
           })(this);
           return this.offset = (function(_this) {
