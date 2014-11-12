@@ -53,11 +53,14 @@ class Tour
 
   activate: () =>
     promise = null
+    template = @getTemplate()
+    template.set($transitioning: true)
     promise = @emit('leave', @lastStep) if @lastStep?
 
     _continue = =>
       @emit('enter', @activeStep).then =>
-        @showStep()
+        @showStep(template)
+        template.set($transitioning: false)
 
     if promise?
       promise.then(_continue)
@@ -109,9 +112,7 @@ class Tour
       @activeStep = @getStep(index)
       true
 
-  showStep: () =>
-    template = @getTemplate()
-    template.setTour(@)
+  showStep: (template) =>
     ctrl = @getController()
     template.show(ctrl, @activeStep)
     ctrl.activate(@activeStep)
@@ -128,6 +129,8 @@ class Tour
 
   getTemplate: () =>
     Tour.templates[@activeStep.template || 'default']
+    template.setTour(@)
+    template
 
   getController: (step = @activeStep) =>
     Tour.controllers[step.for]

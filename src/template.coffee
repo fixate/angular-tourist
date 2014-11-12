@@ -22,6 +22,10 @@ angular.module 'angular.tourist'
         @hide = () ->
           $scope.$show = false
 
+        @set = (vars) ->
+          angular.forEach vars, (v, k) ->
+            $scope[k] = v
+
         @setTour = ($tour) ->
           $scope.$next = () -> $tour.next()
           $scope.$previous = () -> $tour.previous()
