@@ -1,4 +1,5 @@
 gulp = require 'gulp'
+bump = require 'gulp-bump'
 coffee = require 'gulp-coffee'
 gutil = require 'gulp-util'
 watch = require 'gulp-watch'
@@ -25,11 +26,21 @@ DEMO_HTML_FILES = [
   'demo/index.slim'
 ]
 
+BUMP_FILES = [
+  'bower.json',
+  'package.json'
+]
+
 gulp.task 'coffee', () ->
   gulp.src COFFEE_FILES
     .pipe plumber(errorHandler: gutil.log)
     .pipe coffee(bare: true)
     .pipe gulp.dest('./dist/dev/')
+
+gulp.task 'bump', () ->
+  gulp.src BUMP_FILES
+    .pipe bump()
+    .pipe gulp.dest('./')
 
 gulp.task 'demo-coffee', () ->
   gulp.src DEMO_JS_FILES

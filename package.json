@@ -1,6 +1,6 @@
 {
   "name": "angular-tourist",
-  "version": "0.0.0",
+  "version": "0.1.9",
   "description": "Angular directives to help you show people around your app.",
   "main": "angular-tourist.coffee",
   "scripts": {
@@ -24,6 +24,7 @@
   "devDependencies": {
     "coffee-script": "^1.8.0",
     "gulp": "^3.8.10",
+    "gulp-bump": "^0.1.11",
     "gulp-coffee": "^2.2.0",
     "gulp-concat": "^2.4.1",
     "gulp-karma": "0.0.4",

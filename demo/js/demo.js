@@ -5,6 +5,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
       stepDefault: {
         template: 'demo',
         activeClass: 'highlight',
+        zIndex: 2000,
         data: {
           positionMy: "top left",
           positionAt: "left center"

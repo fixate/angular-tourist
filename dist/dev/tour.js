@@ -197,16 +197,24 @@ Tour = (function() {
     var el;
     el = this.getController().element;
     if (this.activeStep.activeClass != null) {
-      return el.addClass(this.activeStep.activeClass);
+      el.addClass(this.activeStep.activeClass);
     }
+    if (el.css('position') === 'static') {
+      el.css('position', 'relative');
+    }
+    return el.css('z-index', this.activeStep.zIndex + 1 || 1001);
   };
 
   Tour.prototype.leave = function() {
     var el;
-    el = this.getController().element;
+    el = this.getController(this.lastStep).element;
     if (this.activeStep.activeClass != null) {
-      return el.removeClass(this.activeStep.activeClass);
+      el.removeClass(this.activeStep.activeClass);
     }
+    return el.css({
+      'z-index': '',
+      'position': ''
+    });
   };
 
   Tour.prototype.getTemplate = function() {
@@ -283,7 +291,10 @@ Tour = (function() {
     return stepData;
   };
 
-  Tour.prototype.getStep = function() {
+  Tour.prototype.getStep = function(index) {
+    if (index == null) {
+      index = this.index;
+    }
     return this.steps[this.index];
   };
 
