@@ -6,22 +6,38 @@ angular.module('angular.tourist').directive('tourStep', [
       restrict: 'EAC',
       controller: [
         '$scope', function($scope) {
-          var _boundingOffset;
+          var _boundingOffset, _isFixed;
           this.element = null;
+          _isFixed = function(element) {
+            while (element.parentNode.tagName !== 'HTML') {
+              if ($window.getComputedStyle(element)['position'] === 'fixed') {
+                return true;
+              }
+              element = element.parentNode;
+            }
+            return false;
+          };
           _boundingOffset = function(element) {
-            var box, doc, documentElem;
+            var box, doc, documentElem, documentOffset;
             if (element == null) {
               return;
             }
             doc = element.ownerDocument;
             documentElem = doc.documentElement;
+            documentOffset = _isFixed(element) ? {
+              x: 0,
+              y: 0
+            } : {
+              x: $window.pageXOffset || documentElem.scrollLeft,
+              y: $window.pageYOffset || documentElem.scrollTop
+            };
             box = typeof element.getBoundingClientRect === "function" ? element.getBoundingClientRect() : void 0;
             if (box == null) {
               return;
             }
             return {
-              top: box.top + ($window.pageYOffset || documentElem.scrollTop) - (documentElem.clientTop || 0),
-              left: box.left + ($window.pageXOffset || documentElem.scrollLeft) - (documentElem.clientLeft || 0),
+              top: box.top + documentOffset.y - (documentElem.clientTop || 0),
+              left: box.left + documentOffset.x - (documentElem.clientLeft || 0),
               width: element.offsetWidth,
               height: element.offsetHeight
             };
@@ -29,24 +45,36 @@ angular.module('angular.tourist').directive('tourStep', [
           this.activate = (function(_this) {
             return function(step) {
               var offset, scroll;
-              offset = _this.offset();
-              scroll = {
-                left: offset.left + offset.width / 2 - $window.innerWidth / 2,
-                top: offset.top + offset.height / 2 - $window.innerHeight / 2
-              };
-              step.activated || (step.activated = [
-                'scroll', function(scroll) {
-                  return $window.scrollTo(scroll.left, scroll.top);
-                }
-              ]);
-              return $injector.invoke(step.activated, _this, {
-                scroll: scroll
-              });
+              if (!_isFixed(_this.element[0])) {
+                offset = _this.offset();
+                scroll = {
+                  left: offset.left + offset.width / 2 - $window.innerWidth / 2,
+                  top: offset.top + offset.height / 2 - $window.innerHeight / 2
+                };
+                step.activated || (step.activated = [
+                  'scroll', function(scroll) {
+                    return $window.scrollTo(scroll.left, scroll.top);
+                  }
+                ]);
+                return $injector.invoke(step.activated, _this, {
+                  scroll: scroll
+                });
+              }
             };
           })(this);
-          return this.offset = (function(_this) {
+          this.offset = (function(_this) {
             return function() {
               return _boundingOffset(_this.element[0]);
+            };
+          })(this);
+          return this.positioning = (function(_this) {
+            return function() {
+              var pos;
+              return pos = _isFixed(_this.element[0]) ? {
+                position: 'fixed'
+              } : {
+                position: 'absolute'
+              };
             };
           })(this);
         }
@@ -75,14 +103,17 @@ angular.module('angular.tourist').directive('tourTemplate', [
         '$scope', function($scope) {
           this.show = function(ctrl, step) {
             $scope.$show = true;
-            $scope.$pos = angular.extend(ctrl.offset(), {
-              position: 'absolute'
-            });
+            $scope.$pos = angular.extend(ctrl.offset(), ctrl.positioning());
             $scope.$data = step.data;
             return $scope.$content = $interpolate(step.content)($scope);
           };
           this.hide = function() {
             return $scope.$show = false;
+          };
+          this.set = function(vars) {
+            return angular.forEach(vars, function(v, k) {
+              return $scope[k] = v;
+            });
           };
           this.setTour = function($tour) {
             $scope.$next = function() {
@@ -214,15 +245,22 @@ Tour = (function() {
   };
 
   Tour.prototype.activate = function() {
-    var promise, _continue;
+    var promise, template, _continue;
     promise = null;
+    template = this.getTemplate();
+    template.set({
+      $transitioning: true
+    });
     if (this.lastStep != null) {
       promise = this.emit('leave', this.lastStep);
     }
     _continue = (function(_this) {
       return function() {
         return _this.emit('enter', _this.activeStep).then(function() {
-          return _this.showStep();
+          _this.showStep(template);
+          return template.set({
+            $transitioning: false
+          });
         });
       };
     })(this);
@@ -294,10 +332,8 @@ Tour = (function() {
     }
   };
 
-  Tour.prototype.showStep = function() {
-    var ctrl, template;
-    template = this.getTemplate();
-    template.setTour(this);
+  Tour.prototype.showStep = function(template) {
+    var ctrl;
     ctrl = this.getController();
     template.show(ctrl, this.activeStep);
     return ctrl.activate(this.activeStep);
@@ -312,7 +348,7 @@ Tour = (function() {
     if (el.css('position') === 'static') {
       el.css('position', 'relative');
     }
-    return el.css('z-index', this.activeStep.zIndex + 1 || 1001);
+    return el.css('z-index', this.activeStep.zIndex || 1000);
   };
 
   Tour.prototype.leave = function() {
@@ -328,7 +364,14 @@ Tour = (function() {
   };
 
   Tour.prototype.getTemplate = function() {
-    return Tour.templates[this.activeStep.template || 'default'];
+    var template, templateKey;
+    templateKey = this.activeStep.template;
+    if (typeof templateKey === 'function') {
+      templateKey = templateKey(this);
+    }
+    template = Tour.templates[templateKey || 'default'];
+    template.setTour(this);
+    return template;
   };
 
   Tour.prototype.getController = function(step) {

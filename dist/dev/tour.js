@@ -99,15 +99,22 @@ Tour = (function() {
   };
 
   Tour.prototype.activate = function() {
-    var promise, _continue;
+    var promise, template, _continue;
     promise = null;
+    template = this.getTemplate();
+    template.set({
+      $transitioning: true
+    });
     if (this.lastStep != null) {
       promise = this.emit('leave', this.lastStep);
     }
     _continue = (function(_this) {
       return function() {
         return _this.emit('enter', _this.activeStep).then(function() {
-          return _this.showStep();
+          _this.showStep(template);
+          return template.set({
+            $transitioning: false
+          });
         });
       };
     })(this);
@@ -179,10 +186,8 @@ Tour = (function() {
     }
   };
 
-  Tour.prototype.showStep = function() {
-    var ctrl, template;
-    template = this.getTemplate();
-    template.setTour(this);
+  Tour.prototype.showStep = function(template) {
+    var ctrl;
     ctrl = this.getController();
     template.show(ctrl, this.activeStep);
     return ctrl.activate(this.activeStep);
@@ -197,7 +202,7 @@ Tour = (function() {
     if (el.css('position') === 'static') {
       el.css('position', 'relative');
     }
-    return el.css('z-index', this.activeStep.zIndex + 1 || 1001);
+    return el.css('z-index', this.activeStep.zIndex || 1000);
   };
 
   Tour.prototype.leave = function() {
@@ -213,7 +218,14 @@ Tour = (function() {
   };
 
   Tour.prototype.getTemplate = function() {
-    return Tour.templates[this.activeStep.template || 'default'];
+    var template, templateKey;
+    templateKey = this.activeStep.template;
+    if (typeof templateKey === 'function') {
+      templateKey = templateKey(this);
+    }
+    template = Tour.templates[templateKey || 'default'];
+    template.setTour(this);
+    return template;
   };
 
   Tour.prototype.getController = function(step) {

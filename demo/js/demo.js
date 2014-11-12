@@ -3,6 +3,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
     return $tour.define('main', {
       autostart: false,
       stepDefault: {
+        template: 'demo',
         activeClass: 'highlight',
         zIndex: 2000,
         data: {
@@ -38,6 +39,15 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
             name: 'Sidenav',
             title: 'Step 1',
             positionAt: "right center"
+          }
+        }, {
+          "for": 'fixedNav',
+          content: 'Fixed elements',
+          data: {
+            name: 'Fixed Nav',
+            title: 'Step 2',
+            positionMy: "right bottom",
+            positionAt: "left top"
           }
         }, {
           "for": 'exitNav',

@@ -15,12 +15,16 @@ angular.module 'angular.tourist'
       controller: ['$scope', ($scope) ->
         @show = (ctrl, step) ->
           $scope.$show = true
-          $scope.$pos = angular.extend(ctrl.offset(), position: 'absolute')
+          $scope.$pos = angular.extend(ctrl.offset(), ctrl.positioning())
           $scope.$data = step.data
           $scope.$content = $interpolate(step.content)($scope)
 
         @hide = () ->
           $scope.$show = false
+
+        @set = (vars) ->
+          angular.forEach vars, (v, k) ->
+            $scope[k] = v
 
         @setTour = ($tour) ->
           $scope.$next = () -> $tour.next()
