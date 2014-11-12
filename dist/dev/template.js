@@ -23,6 +23,11 @@ angular.module('angular.tourist').directive('tourTemplate', [
           this.hide = function() {
             return $scope.$show = false;
           };
+          this.set = function(vars) {
+            return angular.forEach(vars, function(v, k) {
+              return $scope[k] = v;
+            });
+          };
           this.setTour = function($tour) {
             $scope.$next = function() {
               return $tour.next();

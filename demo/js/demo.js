@@ -3,6 +3,7 @@ angular.module('angular.tourist.demo', ['angular.tourist']).config([
     return $tour.define('main', {
       autostart: false,
       stepDefault: {
+        template: 'demo',
         activeClass: 'highlight',
         data: {
           positionMy: "top left",
