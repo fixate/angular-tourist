@@ -5,7 +5,7 @@ head
   link href="/demo/css/style.css" media="all" rel="stylesheet"
   link href="bower_components/qtip2/jquery.qtip.css" media="all" rel="stylesheet"
 
-body ng-controller="DemoCtrl"
+body ng-controller="DemoCtrl" style="height: 2000px"
   nav.top-bar
     ul.title-area
       li.name
@@ -17,6 +17,9 @@ body ng-controller="DemoCtrl"
           button ng-disabled="tourStarted" ng-click="startTour()" Start Tour
         li
           button.alert ng-disabled="!tourStarted" ng-click="endTour()" End Tour
+
+  a.button.nav_-top href="#" tour-step="fixedNav"
+    | back to top
 
   .left
     ul.side-nav tour-step="navigation" ng-class="{'nav-border': navBorder}"

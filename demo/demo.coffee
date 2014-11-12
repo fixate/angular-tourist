@@ -35,6 +35,15 @@ angular.module 'angular.tourist.demo', [
             positionAt: "right center"
         }
         {
+          for: 'fixedNav'
+          content: 'Fixed elements'
+          data:
+            name: 'Fixed Nav'
+            title: 'Step 2'
+            positionMy: "right bottom"
+            positionAt: "left top"
+        }
+        {
           for: 'exitNav'
           content: 'Exit the site?!'
         }

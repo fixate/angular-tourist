@@ -202,7 +202,7 @@ Tour = (function() {
     if (el.css('position') === 'static') {
       el.css('position', 'relative');
     }
-    return el.css('z-index', this.activeStep.zIndex + 1 || 1001);
+    return el.css('z-index', this.activeStep.zIndex || 1000);
   };
 
   Tour.prototype.leave = function() {
