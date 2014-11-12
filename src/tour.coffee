@@ -125,7 +125,7 @@ class Tour
     if el.css('position') == 'static'
       el.css('position', 'relative')
 
-    el.css('z-index', @activeStep.zIndex + 1 || 1001 )
+    el.css('z-index', @activeStep.zIndex  || 1000 )
 
   leave: () =>
     el = @getController(@lastStep).element
