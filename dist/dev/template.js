@@ -14,9 +14,7 @@ angular.module('angular.tourist').directive('tourTemplate', [
         '$scope', function($scope) {
           this.show = function(ctrl, step) {
             $scope.$show = true;
-            $scope.$pos = angular.extend(ctrl.offset(), {
-              position: 'absolute'
-            });
+            $scope.$pos = angular.extend(ctrl.offset(), ctrl.positioning());
             $scope.$data = step.data;
             return $scope.$content = $interpolate(step.content)($scope);
           };

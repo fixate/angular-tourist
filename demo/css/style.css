@@ -32,3 +32,8 @@
   border: 2px dashed #75ef87;
 }
 
+.nav_-top {
+	position: fixed;
+	right: 1em;
+	bottom: 1em;
+}
