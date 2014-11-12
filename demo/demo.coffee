@@ -5,6 +5,7 @@ angular.module 'angular.tourist.demo', [
     $tour.define 'main',
       autostart: false
       stepDefault:
+        template: 'demo' # optional, can be a function which returns a string
         activeClass: 'highlight'
         data:
           positionMy: "top left"

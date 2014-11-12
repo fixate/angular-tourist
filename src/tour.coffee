@@ -128,7 +128,10 @@ class Tour
       el.removeClass(@activeStep.activeClass)
 
   getTemplate: () =>
-    Tour.templates[@activeStep.template || 'default']
+    templateKey = @activeStep.template
+    if typeof templateKey == 'function'
+      templateKey = templateKey(@)
+    template = Tour.templates[templateKey || 'default']
     template.setTour(@)
     template
 
