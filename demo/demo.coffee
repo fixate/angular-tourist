@@ -7,7 +7,6 @@ angular.module 'angular.tourist.demo', [
       stepDefault:
         template: 'demo' # optional, can be a function which returns a string
         activeClass: 'highlight'
-        zIndex: 2000
         data:
           positionMy: "top left"
           positionAt: "left center"
