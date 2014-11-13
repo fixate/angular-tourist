@@ -125,14 +125,12 @@ class Tour
     if el.css('position') == 'static'
       el.css('position', 'relative')
 
-    el.css('z-index', @activeStep.zIndex  || 1000 )
-
   leave: () =>
     el = @getController(@lastStep).element
     if @activeStep.activeClass?
       el.removeClass(@activeStep.activeClass)
 
-    el.css({'z-index': '', 'position': ''})
+    el.css({ 'position': '' })
 
   getTemplate: () =>
     templateKey = @activeStep.template

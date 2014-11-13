@@ -4,22 +4,35 @@ angular.module 'angular.tourist'
     restrict: 'EAC'
     controller: ['$scope', ($scope) ->
       @element = null
+      _stepIsFixed = null
 
       _isFixed = (element) ->
-        while element.parentNode.tagName != 'HTML'
-          if $window.getComputedStyle(element)['position'] == 'fixed'
-            return true
-          element = element.parentNode
+        if !_stepIsFixed?
+          while element.parentNode.tagName != 'HTML'
+            if $window.getComputedStyle(element)['position'] == 'fixed'
+              _stepIsFixed = true
+              break
+            else
+              _stepIsFixed = false
+              element = element.parentNode
 
-        return false
+        _stepIsFixed
 
       # JQLite doesnt support offset, so we implement it here
       _boundingOffset = (element) ->
         return unless element?
         doc = element.ownerDocument
         documentElem = doc.documentElement
-        documentOffset = if _isFixed(element) then { x: 0, y: 0 } else { x: $window.pageXOffset || documentElem.scrollLeft, y: $window.pageYOffset || documentElem.scrollTop }
         box = element.getBoundingClientRect?()
+
+        if _isFixed(element)
+          documentOffset =
+            x: 0,
+            y: 0
+        else
+          documentOffset =
+            x: $window.pageXOffset || documentElem.scrollLeft,
+            y: $window.pageYOffset || documentElem.scrollTop
 
         return unless box?
 

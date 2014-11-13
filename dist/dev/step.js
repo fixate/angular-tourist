@@ -4,16 +4,22 @@ angular.module('angular.tourist').directive('tourStep', [
       restrict: 'EAC',
       controller: [
         '$scope', function($scope) {
-          var _boundingOffset, _isFixed;
+          var _boundingOffset, _isFixed, _stepIsFixed;
           this.element = null;
+          _stepIsFixed = null;
           _isFixed = function(element) {
-            while (element.parentNode.tagName !== 'HTML') {
-              if ($window.getComputedStyle(element)['position'] === 'fixed') {
-                return true;
+            if (_stepIsFixed == null) {
+              while (element.parentNode.tagName !== 'HTML') {
+                if ($window.getComputedStyle(element)['position'] === 'fixed') {
+                  _stepIsFixed = true;
+                  break;
+                } else {
+                  _stepIsFixed = false;
+                  element = element.parentNode;
+                }
               }
-              element = element.parentNode;
             }
-            return false;
+            return _stepIsFixed;
           };
           _boundingOffset = function(element) {
             var box, doc, documentElem, documentOffset;
@@ -22,14 +28,18 @@ angular.module('angular.tourist').directive('tourStep', [
             }
             doc = element.ownerDocument;
             documentElem = doc.documentElement;
-            documentOffset = _isFixed(element) ? {
-              x: 0,
-              y: 0
-            } : {
-              x: $window.pageXOffset || documentElem.scrollLeft,
-              y: $window.pageYOffset || documentElem.scrollTop
-            };
             box = typeof element.getBoundingClientRect === "function" ? element.getBoundingClientRect() : void 0;
+            if (_isFixed(element)) {
+              documentOffset = {
+                x: 0,
+                y: 0
+              };
+            } else {
+              documentOffset = {
+                x: $window.pageXOffset || documentElem.scrollLeft,
+                y: $window.pageYOffset || documentElem.scrollTop
+              };
+            }
             if (box == null) {
               return;
             }

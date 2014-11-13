@@ -1,6 +1,6 @@
 {
   "name": "angular-tourist",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Angular directives to help you show people around your app.",
   "main": "angular-tourist.coffee",
   "scripts": {
