@@ -200,9 +200,8 @@ Tour = (function() {
       el.addClass(this.activeStep.activeClass);
     }
     if (el.css('position') === 'static') {
-      el.css('position', 'relative');
+      return el.css('position', 'relative');
     }
-    return el.css('z-index', this.activeStep.zIndex || 1000);
   };
 
   Tour.prototype.leave = function() {
@@ -212,7 +211,6 @@ Tour = (function() {
       el.removeClass(this.activeStep.activeClass);
     }
     return el.css({
-      'z-index': '',
       'position': ''
     });
   };
