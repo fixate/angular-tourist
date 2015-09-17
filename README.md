@@ -3,7 +3,7 @@ angular-tourist
 
 Angular directives to help you show people around your app.
 
-Let's just get something straight right now hmkay, this module does not give you
+Let's just get something straight right now hmkay :) this module does not give you
 a 'plug and play' tour. This module is meant to provide an 'engine' for
 setting up a set of steps which trigger your UI.
 
@@ -15,9 +15,9 @@ You will need to:
 
 This is so that we can reuse these components for vastly different angular projects.
 
-Disclaimer: This is still in very early development. The API needs work and will change.
-            Having said that, it's usable and we are going to use it in production very soon.
-            We plan on making this easier to understand and use.
+## Status
+
+We use this in production - it works - give it a try!
 
 ## Installation
 
