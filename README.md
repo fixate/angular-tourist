@@ -145,11 +145,11 @@ angular.module('my.app', ['angular.tourist'])
 ```
 module.controller('MyCtrl', ['$scope', 'tourist', ($scope, tourist) ->
   // Only needed if you have autostart: false in the config
-  $scope.startTour = function() {
+  this.startTour = function() {
     tourist.start(); // optional first arg is the index to start at.
    };
 
-   $scope.endTour = function() {
+   this.endTour = function() {
       tourist.end()
    }
 ])
